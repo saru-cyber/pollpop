@@ -6,6 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { BrandHeader } from "@/components/BrandHeader";
 import { CopyButton } from "@/components/CopyButton";
 import { LiveResultsChart } from "@/components/LiveResultsChart";
+import { getAppBaseUrl, getConfiguredAppUrl } from "@/lib/app-url";
 import { clearActivePollId } from "@/lib/poll-storage";
 import { closePoll } from "@/lib/polls";
 import { useLivePoll } from "@/lib/hooks/useLivePoll";
@@ -14,8 +15,12 @@ function subscribeNoop() {
   return () => {};
 }
 
-function getOrigin() {
-  return window.location.origin;
+function readClientBaseUrl() {
+  return getAppBaseUrl();
+}
+
+function readServerBaseUrl() {
+  return getConfiguredAppUrl() ?? "";
 }
 
 export default function AdminPage() {
@@ -24,15 +29,19 @@ export default function AdminPage() {
   const router = useRouter();
   const { poll, counts, totalVotes, loading, error } = useLivePoll(pollId);
   const [closing, setClosing] = useState(false);
-  const origin = useSyncExternalStore(subscribeNoop, getOrigin, () => "");
+  const baseUrl = useSyncExternalStore(
+    subscribeNoop,
+    readClientBaseUrl,
+    readServerBaseUrl,
+  );
 
   const voteUrl = useMemo(
-    () => (origin ? `${origin}/poll/${pollId}` : ""),
-    [origin, pollId],
+    () => (baseUrl ? `${baseUrl}/poll/${pollId}` : ""),
+    [baseUrl, pollId],
   );
   const obsUrl = useMemo(
-    () => (origin ? `${origin}/poll/${pollId}/obs` : ""),
-    [origin, pollId],
+    () => (baseUrl ? `${baseUrl}/poll/${pollId}/obs` : ""),
+    [baseUrl, pollId],
   );
 
   async function handleClose() {
