@@ -89,12 +89,12 @@ export default function AdminPage() {
         </p>
       </div>
 
-      <section className="grid gap-6 rounded-3xl border border-[var(--panel-border)] bg-[var(--panel)]/80 p-6 backdrop-blur sm:grid-cols-[auto_1fr] sm:p-8">
-        <div className="flex flex-col items-center gap-3">
+      <section className="grid gap-8 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-10">
+        <div className="flex flex-col items-center gap-3 sm:items-start">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
             QR Code for Voters
           </p>
-          <div className="rounded-2xl bg-white p-3">
+          <div className="bg-white p-3">
             {voteUrl ? (
               <QRCodeSVG value={voteUrl} size={160} level="M" />
             ) : (
@@ -103,13 +103,13 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-6">
           <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
               Share Link
             </p>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <code className="flex-1 truncate rounded-xl border border-slate-700 bg-slate-950/50 px-3 py-2.5 text-xs text-cyan-200">
+              <code className="flex-1 truncate border-b border-slate-700/60 py-2.5 text-xs text-cyan-200">
                 {voteUrl || "…"}
               </code>
               <CopyButton label="📋 Copy Link" value={voteUrl} />
@@ -121,7 +121,7 @@ export default function AdminPage() {
               OBS Overlay URL (Animal Race)
             </p>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <code className="flex-1 truncate rounded-xl border border-slate-700 bg-slate-950/50 px-3 py-2.5 text-xs text-orange-200">
+              <code className="flex-1 truncate border-b border-slate-700/60 py-2.5 text-xs text-orange-200">
                 {obsUrl || "…"}
               </code>
               <CopyButton label="📋 Copy OBS Link" value={obsUrl} />
@@ -130,7 +130,7 @@ export default function AdminPage() {
         </div>
       </section>
 
-      <section className="mt-6 rounded-3xl border border-[var(--panel-border)] bg-[var(--panel)]/80 p-6 sm:p-8">
+      <section className="mt-12">
         <h2 className="mb-5 font-[family-name:var(--font-display)] text-lg font-bold text-slate-100">
           📊 Live Results
         </h2>
@@ -142,12 +142,12 @@ export default function AdminPage() {
         />
       </section>
 
-      <div className="mt-6 flex flex-col gap-4">
+      <div className="mt-12 flex flex-col gap-8">
         <button
           type="button"
           disabled={closing || poll.is_closed}
           onClick={() => void handleClose()}
-          className="w-full rounded-2xl border border-rose-400/40 bg-rose-500/15 px-6 py-4 text-base font-bold text-rose-200 transition hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full border-b border-rose-400/50 py-4 text-left text-base font-bold text-rose-200 transition hover:text-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {poll.is_closed
             ? "Poll Closed"
@@ -156,13 +156,13 @@ export default function AdminPage() {
               : "🔒 Close Poll & Create Next"}
         </button>
 
-        <div className="rounded-2xl border border-amber-400/20 bg-amber-400/5 px-5 py-4 text-center">
-          <p className="text-sm text-amber-100/90">
+        <div className="text-center sm:text-left">
+          <p className="text-sm text-slate-400">
             ⭐ Monetize your stream with Super Votes & Custom Avatars!
           </p>
           <button
             type="button"
-            className="mt-3 rounded-xl bg-slate-700/80 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="mt-3 text-sm font-semibold text-cyan-300/90 underline-offset-4 hover:underline disabled:no-underline disabled:opacity-60"
             disabled
           >
             Upgrade to Pro ($8/mo) — coming soon
