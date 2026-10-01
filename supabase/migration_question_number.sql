@@ -3,6 +3,11 @@
 alter table public.polls
   add column if not exists question_number integer default 1 not null;
 
+-- Table privilege is required in addition to RLS (anon key DELETE from browser)
+grant select, insert, update, delete
+  on table public.votes
+  to anon, authenticated;
+
 -- Allow clearing votes when starting the next question in the same room
 do $$
 begin

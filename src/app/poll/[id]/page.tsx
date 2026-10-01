@@ -9,7 +9,7 @@ import {
 } from "@/lib/poll-storage";
 import { castVote } from "@/lib/polls";
 import { useLivePoll } from "@/lib/hooks/useLivePoll";
-import { getOptionIcon, getThemeVisuals } from "@/lib/themes";
+import { getOptionIcon, getTheme } from "@/config/themes";
 
 const COMBO_WINDOW_MS = 1800;
 
@@ -32,7 +32,8 @@ export default function VotePage() {
   const [voteError, setVoteError] = useState<string | null>(null);
   const [lastTapAt, setLastTapAt] = useState(0);
 
-  const visuals = getThemeVisuals(poll?.theme);
+  const themeConfig = getTheme(poll?.theme);
+  const vote = themeConfig.vote;
   const maxVotes = poll?.max_votes_per_user ?? 5;
   const unlimited = maxVotes === -1;
   const remaining = unlimited ? Infinity : Math.max(0, maxVotes - votedCount);
@@ -91,14 +92,14 @@ export default function VotePage() {
 
   return (
     <main
-      className={`relative mx-auto flex min-h-screen w-full max-w-lg flex-col px-4 py-8 ${visuals.vote.page}`}
+      className={`relative mx-auto flex min-h-screen w-full max-w-lg flex-col px-4 py-8 ${vote.bg}`}
     >
       <ComboPopup combo={combo} />
 
       <div className="mb-2 text-center">
         <div className="flex items-center justify-center gap-2">
           <p
-            className={`text-xs font-semibold uppercase tracking-[0.2em] ${visuals.vote.brand}`}
+            className={`text-xs font-semibold uppercase tracking-[0.2em] ${vote.brand}`}
           >
             PollPop
           </p>
@@ -109,11 +110,11 @@ export default function VotePage() {
           ) : null}
         </div>
         <h1
-          className={`mt-2 font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight sm:text-3xl ${visuals.vote.title}`}
+          className={`mt-2 font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight sm:text-3xl ${vote.title}`}
         >
           {poll.title}
         </h1>
-        <p className={`mt-3 text-sm font-medium ${visuals.vote.meta}`}>
+        <p className={`mt-3 text-sm font-medium ${vote.meta}`}>
           {remainingLabel}
         </p>
         {poll.is_closed && (
@@ -139,7 +140,7 @@ export default function VotePage() {
               type="button"
               disabled={!canVote || votingOptionId !== null}
               onClick={() => void handleVote(option.id)}
-              className={`min-h-[4.5rem] rounded-2xl border px-5 py-4 text-left text-lg font-bold shadow-lg shadow-black/10 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 ${visuals.vote.button}`}
+              className={`min-h-[4.5rem] rounded-2xl border px-5 py-4 text-left text-lg font-bold shadow-lg shadow-black/10 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 ${vote.button}`}
             >
               {icon ? <span className="mr-3 text-2xl">{icon}</span> : null}
               {busy ? "Sending…" : option.text}
@@ -154,7 +155,7 @@ export default function VotePage() {
         </p>
       )}
 
-      <p className={`mt-8 text-center text-xs ${visuals.vote.footer}`}>
+      <p className={`mt-8 text-center text-xs ${vote.footer}`}>
         Tap fast for COMBO! · Votes sync live to OBS
       </p>
     </main>

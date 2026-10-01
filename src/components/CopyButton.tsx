@@ -8,7 +8,11 @@ type CopyButtonProps = {
   className?: string;
 };
 
-export function CopyButton({ label, value, className = "" }: CopyButtonProps) {
+export function CopyButton({
+  label,
+  value,
+  className = "bg-cyan-500 hover:bg-cyan-400 text-slate-950",
+}: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -25,7 +29,7 @@ export function CopyButton({ label, value, className = "" }: CopyButtonProps) {
     <button
       type="button"
       onClick={() => void handleCopy()}
-      className={`rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 active:scale-[0.98] ${className}`}
+      className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition active:scale-[0.98] ${className}`}
     >
       {copied ? "Copied!" : label}
     </button>

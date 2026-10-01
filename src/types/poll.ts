@@ -27,32 +27,7 @@ export const MAX_VOTES_OPTIONS: { value: MaxVotesPerUser; label: string }[] = [
   { value: 12, label: "12 Votes" },
 ];
 
-/** Free: dark/light/game/party · Pro: animal_race (Free Trial allowed) */
-export const THEME_DEFINITIONS: ThemeDefinition[] = [
-  { value: "dark", label: "Minimal Dark", tier: "free" },
-  { value: "light", label: "Light Mode", tier: "free" },
-  { value: "game", label: "Game Mode", tier: "free" },
-  { value: "party", label: "Party Mode", tier: "free" },
-  {
-    value: "animal_race",
-    label: "Animal Race 🦊",
-    tier: "pro",
-    freeTrialAllowed: true,
-  },
-];
-
-export const THEME_OPTIONS: { value: PollTheme; label: string }[] =
-  THEME_DEFINITIONS.map(({ value, label }) => ({ value, label }));
-
-export const FREE_THEMES = THEME_DEFINITIONS.filter((t) => t.tier === "free").map(
-  (t) => t.value,
-);
-
-export const PRO_THEMES = THEME_DEFINITIONS.filter((t) => t.tier === "pro").map(
-  (t) => t.value,
-);
-
-export const ANIMAL_ICONS = ["🐶", "🐱", "🐰", "🦊", "🐻"] as const;
+/** Theme catalogs: import from `@/config/themes` (THEMES, THEME_OPTIONS, …). */
 
 export type Poll = {
   id: string;

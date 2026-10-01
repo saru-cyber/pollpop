@@ -3,10 +3,14 @@
 import { FormEvent, useMemo, useState } from "react";
 import { BrandHeader } from "@/components/BrandHeader";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
-import { canUseTheme, getOptionIcon, getThemeVisuals } from "@/lib/themes";
+import {
+  canUseTheme,
+  getOptionIcon,
+  getTheme,
+  THEME_OPTIONS,
+} from "@/config/themes";
 import {
   MAX_VOTES_OPTIONS,
-  THEME_OPTIONS,
   type MaxVotesPerUser,
   type PollOption,
   type PollTheme,
@@ -46,8 +50,8 @@ export function PollCreateForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const visuals = getThemeVisuals(theme);
-  const create = visuals.create;
+  const themeConfig = getTheme(theme);
+  const create = themeConfig.create;
   const showQuestionBadge = questionNumber >= 2;
 
   const selectChevron = useMemo(
@@ -108,7 +112,7 @@ export function PollCreateForm({
 
   return (
     <main
-      className={`min-h-screen w-full transition-colors duration-300 ${create.page}`}
+      className={`min-h-screen w-full transition-colors duration-300 ${create.bg}`}
     >
       <div className="mx-auto w-full max-w-xl px-4 py-10">
         <BrandHeader

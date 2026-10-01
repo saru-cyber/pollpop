@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { getOptionIcon } from "@/lib/themes";
+import { getOptionIcon, getTheme } from "@/config/themes";
 import type { PollOption, PollTheme, VoteCounts } from "@/types/poll";
 
 type WinnerCelebrationProps = {
@@ -42,14 +42,6 @@ function playWinnerPop() {
   }
 }
 
-const CONFETTI = Array.from({ length: 28 }, (_, i) => ({
-  id: i,
-  emoji: ["✨", "💖", "🎉", "🌸", "⭐", "🍃"][i % 6],
-  x: ((i * 37) % 100) - 50,
-  delay: (i % 8) * 0.05,
-  duration: 1.4 + (i % 5) * 0.15,
-}));
-
 export function WinnerCelebration({
   open,
   options,
@@ -57,6 +49,21 @@ export function WinnerCelebration({
   theme,
   showAvatar,
 }: WinnerCelebrationProps) {
+  const themeConfig = getTheme(theme);
+  const vfx = themeConfig.vfx;
+
+  const confetti = useMemo(
+    () =>
+      Array.from({ length: 28 }, (_, i) => ({
+        id: i,
+        emoji: vfx.confetti[i % vfx.confetti.length],
+        x: ((i * 37) % 100) - 50,
+        delay: (i % 8) * 0.05,
+        duration: 1.4 + (i % 5) * 0.15,
+      })),
+    [vfx.confetti],
+  );
+
   const winner = useMemo(() => {
     if (!options.length) return null;
     let best = options[0];
@@ -78,9 +85,9 @@ export function WinnerCelebration({
   }, [options, counts, theme, showAvatar]);
 
   useEffect(() => {
-    if (!open || !winner) return;
+    if (!open || !winner || !vfx.playWinnerSe) return;
     playWinnerPop();
-  }, [open, winner]);
+  }, [open, winner, vfx.playWinnerSe]);
 
   return (
     <AnimatePresence>
@@ -97,17 +104,21 @@ export function WinnerCelebration({
             animate={{ y: 0, scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 320, damping: 16 }}
           >
-            <div className="rounded-full bg-gradient-to-r from-amber-300 via-pink-300 to-lime-300 px-5 py-2 text-center shadow-lg shadow-amber-200/50">
-              <p className="font-[family-name:var(--font-display)] text-sm font-black tracking-[0.2em] text-emerald-950 sm:text-base">
+            <div className={vfx.winnerBanner}>
+              <p
+                className={`font-[family-name:var(--font-display)] text-sm font-black tracking-[0.2em] sm:text-base ${vfx.winnerTitle}`}
+              >
                 👑 RESULT
               </p>
-              <p className="font-[family-name:var(--font-display)] text-2xl font-black text-emerald-950 sm:text-3xl">
+              <p
+                className={`font-[family-name:var(--font-display)] text-2xl font-black sm:text-3xl ${vfx.winnerTitle}`}
+              >
                 WINNER!
               </p>
             </div>
           </motion.div>
 
-          {CONFETTI.map((piece) => (
+          {confetti.map((piece) => (
             <motion.span
               key={piece.id}
               className="absolute left-1/2 top-1/3 text-lg sm:text-xl"
@@ -152,14 +163,16 @@ export function WinnerCelebration({
                 <span className="text-7xl drop-shadow-xl sm:text-8xl">
                   {winner.icon}
                 </span>
-                <p className="mt-2 max-w-[14rem] truncate rounded-full bg-white/90 px-4 py-1 text-center text-sm font-bold text-emerald-950 shadow">
+                <p
+                  className={`mt-2 max-w-[14rem] truncate text-center ${vfx.winnerNameChip}`}
+                >
                   {winner.option.text}
                 </p>
               </div>
             </motion.div>
           ) : (
             <motion.p
-              className="absolute left-1/2 top-[42%] z-50 max-w-[80%] -translate-x-1/2 truncate text-center font-[family-name:var(--font-display)] text-2xl font-black text-pink-500 drop-shadow sm:text-3xl"
+              className={`absolute left-1/2 top-[42%] z-50 max-w-[80%] -translate-x-1/2 truncate text-center font-[family-name:var(--font-display)] text-2xl font-black sm:text-3xl ${vfx.winnerNamePlain}`}
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: [0.6, 1.1, 1], opacity: 1 }}
               transition={{ type: "spring", stiffness: 280, damping: 14 }}

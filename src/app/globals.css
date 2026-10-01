@@ -32,6 +32,12 @@ html.obs-transparent body {
   background-image: none !important;
 }
 
+/* Admin View: body yields to theme shell on the page */
+body.admin-shell {
+  background: transparent !important;
+  background-image: none !important;
+}
+
 input[type="radio"] {
   accent-color: #22d3ee;
 }

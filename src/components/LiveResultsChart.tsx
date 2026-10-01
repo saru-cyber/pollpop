@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { WinnerCelebration } from "@/components/WinnerCelebration";
-import { getOptionIcon, getThemeVisuals } from "@/lib/themes";
+import { getOptionIcon, getTheme } from "@/config/themes";
 import type { PollOption, PollTheme, Vote, VoteCounts } from "@/types/poll";
 
 const SLEEP_IDLE_MS = 30_000;
@@ -20,6 +20,8 @@ type LiveResultsChartProps = {
   showAnimals?: boolean;
   bumpedOptionId?: number | null;
   transparent?: boolean;
+  /** Use admin chart palette (dark forest for Animal Race, etc.) */
+  surface?: "default" | "admin";
   isClosed?: boolean;
   questionNumber?: number;
 };
@@ -77,11 +79,16 @@ export function LiveResultsChart({
   showAnimals,
   bumpedOptionId = null,
   transparent = false,
+  surface = "default",
   isClosed = false,
   questionNumber = 1,
 }: LiveResultsChartProps) {
-  const visuals = getThemeVisuals(theme);
-  const useAvatars = showAnimals ?? visuals.showAvatars;
+  const themeConfig = getTheme(theme);
+  const chartTone =
+    surface === "admin" && !transparent
+      ? themeConfig.admin.chart
+      : themeConfig.chart;
+  const useAvatars = showAnimals ?? themeConfig.showAvatars;
   const maxVotesInPoll = Math.max(
     0,
     ...options.map((o) => counts[o.id] ?? 0),
@@ -155,15 +162,17 @@ export function LiveResultsChart({
 
   const labelClass = transparent
     ? "text-white drop-shadow"
-    : visuals.chart.label;
+    : chartTone.label;
   const metaClass = transparent
     ? "text-white/90 drop-shadow"
-    : visuals.chart.meta;
-  const trackClass = transparent ? "bg-white/20" : visuals.chart.track;
-  const emptyClass = transparent ? "text-white/70" : visuals.chart.empty;
+    : chartTone.meta;
+  const trackClass = transparent ? "bg-white/20" : chartTone.track;
+  const emptyClass = transparent ? "text-white/70" : chartTone.empty;
+
+  const badgeClass = themeConfig.vfx.mascotBadge;
 
   return (
-    <div className="relative flex flex-col gap-4">
+    <div className={`relative flex flex-col ${useAvatars ? "gap-6" : "gap-4"}`}>
       <WinnerCelebration
         open={winnerActive}
         options={options}
@@ -179,7 +188,7 @@ export function LiveResultsChart({
         const widthPercent = (optionVotes / maxScale) * 100;
         const icon = useAvatars ? getOptionIcon(theme, index) : null;
         const barColor =
-          visuals.barColors[index % visuals.barColors.length];
+          themeConfig.barColors[index % themeConfig.barColors.length];
 
         const rank = ranks[option.id] ?? null;
         const lastAt = Math.max(
@@ -219,55 +228,62 @@ export function LiveResultsChart({
 
         return (
           <div key={option.id} className="relative">
-            <div className="mb-1.5 flex items-baseline justify-between gap-2">
-              <span className={`truncate text-sm font-semibold ${labelClass}`}>
+            <div className="mb-1.5 flex items-baseline justify-between gap-3">
+              <span
+                className={`relative z-10 min-w-0 truncate text-sm font-bold tracking-tight ${labelClass}`}
+              >
                 {option.text}
               </span>
-              <span className={`shrink-0 text-xs tabular-nums ${metaClass}`}>
+              <span
+                className={`relative z-10 shrink-0 text-xs font-medium tabular-nums ${metaClass}`}
+              >
                 {optionVotes} ({sharePct.toFixed(0)}%)
               </span>
             </div>
 
-            <div
-              className={`relative overflow-visible rounded-full ${barHeight} ${trackClass}`}
-            >
+            {/* Reserve vertical room so mascot badges never cover option labels */}
+            <div className={useAvatars ? "pt-6" : undefined}>
               <div
-                className={`absolute inset-y-0 left-0 rounded-full transition-[width] duration-500 ease-out ${
-                  isWinnerBar ? "winner-bar-pulse" : barColor
-                }`}
-                style={{ width: `${widthPercent}%` }}
-              />
-
-              {useAvatars && icon && !winnerActive && (
+                className={`relative overflow-visible rounded-full ${barHeight} ${trackClass}`}
+              >
                 <div
-                  className="absolute top-1/2 z-10 -translate-y-1/2 transition-[left] duration-500 ease-out"
-                  style={{
-                    left: `calc(${widthPercent}% - 1.1rem)`,
-                  }}
-                >
-                  <div className="relative">
-                    <AnimatePresence>
-                      {badge && (
-                        <motion.span
-                          key={badge}
-                          initial={{ opacity: 0, y: 4, scale: 0.85 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          className="mascot-badge absolute -top-5 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-950/85 px-2 py-0.5 text-[10px] font-bold leading-none text-lime-50 shadow-lg ring-1 ring-white/25"
-                        >
-                          {badge}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                    <span
-                      className={`inline-block text-2xl drop-shadow-lg ${mascotAnim}`}
-                      aria-hidden
-                    >
-                      {icon}
-                    </span>
+                  className={`absolute inset-y-0 left-0 rounded-full transition-[width] duration-500 ease-out ${
+                    isWinnerBar ? "winner-bar-pulse" : barColor
+                  }`}
+                  style={{ width: `${widthPercent}%` }}
+                />
+
+                {useAvatars && icon && !winnerActive && (
+                  <div
+                    className="absolute top-1/2 z-10 -translate-y-1/2 transition-[left] duration-500 ease-out"
+                    style={{
+                      left: `calc(${widthPercent}% - 1.1rem)`,
+                    }}
+                  >
+                    <div className="relative">
+                      <AnimatePresence>
+                        {badge && (
+                          <motion.span
+                            key={badge}
+                            initial={{ opacity: 0, y: 4, scale: 0.85 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className={`mascot-badge absolute bottom-full left-1/2 z-20 mb-1 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold leading-none ${badgeClass}`}
+                          >
+                            {badge}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                      <span
+                        className={`inline-block text-2xl drop-shadow-lg ${mascotAnim}`}
+                        aria-hidden
+                      >
+                        {icon}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         );
