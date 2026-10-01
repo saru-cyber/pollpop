@@ -21,6 +21,7 @@ create table if not exists public.polls (
   enable_super_votes boolean default false,
   manual_votes jsonb default '{}'::jsonb,
   custom_mascot_url text,
+  question_number integer default 1 not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -54,6 +55,7 @@ create policy "Allow insert polls" on public.polls for insert with check (true);
 create policy "Allow update polls" on public.polls for update using (true);
 create policy "Allow public read votes" on public.votes for select using (true);
 create policy "Allow public insert votes" on public.votes for insert with check (true);
+create policy "Allow public delete votes" on public.votes for delete using (true);
 create policy "Allow public read paid_votes" on public.paid_votes for select using (true);
 
 alter publication supabase_realtime add table public.polls;

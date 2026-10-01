@@ -18,11 +18,13 @@ export default function VotePage() {
   const pollId = params.id;
   const { poll, loading, error } = useLivePoll(pollId);
 
-  const [votedCount, setVotedCount] = useState(() => getVotedCount(pollId));
-  const [trackedPollId, setTrackedPollId] = useState(pollId);
-  if (trackedPollId !== pollId) {
-    setTrackedPollId(pollId);
-    setVotedCount(getVotedCount(pollId));
+  const questionNumber = poll?.question_number ?? 1;
+  const [votedCount, setVotedCount] = useState(0);
+  const [trackedKey, setTrackedKey] = useState(`${pollId}:1`);
+  const voteKey = `${pollId}:${questionNumber}`;
+  if (trackedKey !== voteKey && poll) {
+    setTrackedKey(voteKey);
+    setVotedCount(getVotedCount(pollId, questionNumber));
   }
 
   const [combo, setCombo] = useState(0);
@@ -51,7 +53,7 @@ export default function VotePage() {
 
       try {
         await castVote(pollId, optionId);
-        const nextCount = incrementVotedCount(pollId);
+        const nextCount = incrementVotedCount(pollId, poll.question_number);
         setVotedCount(nextCount);
 
         const now = Date.now();
@@ -94,11 +96,18 @@ export default function VotePage() {
       <ComboPopup combo={combo} />
 
       <div className="mb-2 text-center">
-        <p
-          className={`text-xs font-semibold uppercase tracking-[0.2em] ${visuals.vote.brand}`}
-        >
-          PollPop
-        </p>
+        <div className="flex items-center justify-center gap-2">
+          <p
+            className={`text-xs font-semibold uppercase tracking-[0.2em] ${visuals.vote.brand}`}
+          >
+            PollPop
+          </p>
+          {questionNumber >= 2 ? (
+            <span className="rounded-full border border-current/20 px-2 py-0.5 text-[10px] font-bold opacity-80">
+              Q{questionNumber}
+            </span>
+          ) : null}
+        </div>
         <h1
           className={`mt-2 font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight sm:text-3xl ${visuals.vote.title}`}
         >
@@ -109,7 +118,7 @@ export default function VotePage() {
         </p>
         {poll.is_closed && (
           <p className="mt-2 rounded-xl bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
-            This poll is closed.
+            This question is closed. Waiting for the next one…
           </p>
         )}
         {!poll.is_closed && !canVote && (

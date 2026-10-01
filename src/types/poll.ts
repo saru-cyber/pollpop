@@ -66,6 +66,7 @@ export type Poll = {
   enable_super_votes: boolean;
   manual_votes: Record<string, number>;
   custom_mascot_url: string | null;
+  question_number: number;
   created_at: string;
 };
 

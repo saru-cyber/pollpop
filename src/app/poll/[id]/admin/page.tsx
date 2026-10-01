@@ -7,7 +7,11 @@ import { BrandHeader } from "@/components/BrandHeader";
 import { CopyButton } from "@/components/CopyButton";
 import { LiveResultsChart } from "@/components/LiveResultsChart";
 import { getAppBaseUrl, getConfiguredAppUrl } from "@/lib/app-url";
-import { clearActivePollId } from "@/lib/poll-storage";
+import {
+  clearActivePollId,
+  setActivePollId,
+  setSessionPhase,
+} from "@/lib/poll-storage";
 import { closePoll } from "@/lib/polls";
 import { useLivePoll } from "@/lib/hooks/useLivePoll";
 
@@ -29,7 +33,7 @@ export default function AdminPage() {
   const router = useRouter();
   const { poll, counts, totalVotes, loading, error, votes, lastBumpedOptionId } =
     useLivePoll(pollId);
-  const [closing, setClosing] = useState(false);
+  const [busy, setBusy] = useState<"next" | "finish" | null>(null);
   const baseUrl = useSyncExternalStore(
     subscribeNoop,
     readClientBaseUrl,
@@ -45,18 +49,48 @@ export default function AdminPage() {
     [baseUrl, pollId],
   );
 
-  async function handleClose() {
-    if (!confirm("Close this poll? You can create a new one afterwards.")) {
+  async function handleCloseAndNext() {
+    if (
+      poll &&
+      !poll.is_closed &&
+      !confirm(
+        "Close this question and create the next one in the same room (same share / OBS URL)?",
+      )
+    ) {
       return;
     }
-    setClosing(true);
+    setBusy("next");
     try {
-      await closePoll(pollId);
+      if (poll && !poll.is_closed) {
+        await closePoll(pollId);
+      }
+      setActivePollId(pollId);
+      setSessionPhase("compose_next");
+      router.push(`/poll/${pollId}/next`);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to close poll");
+      setBusy(null);
+    }
+  }
+
+  async function handleFinishStream() {
+    if (
+      !confirm(
+        "Finish this stream? You'll leave this room and create a brand-new poll URL next time.",
+      )
+    ) {
+      return;
+    }
+    setBusy("finish");
+    try {
+      if (poll && !poll.is_closed) {
+        await closePoll(pollId);
+      }
       clearActivePollId();
       router.push("/");
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Failed to close poll");
-      setClosing(false);
+      alert(e instanceof Error ? e.message : "Failed to finish stream");
+      setBusy(null);
     }
   }
 
@@ -86,16 +120,40 @@ export default function AdminPage() {
     );
   }
 
+  const questionNumber = poll.question_number ?? 1;
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10">
-      <BrandHeader />
+      <BrandHeader
+        rightSlot={
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={() => void handleFinishStream()}
+            className="rounded-full border border-slate-600/70 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-rose-400/40 hover:text-rose-200 disabled:opacity-50"
+          >
+            {busy === "finish" ? "Finishing…" : "🛑 Finish Stream"}
+          </button>
+        }
+      />
 
       <div className="mb-6">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          {questionNumber >= 2 ? (
+            <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold tracking-wide text-cyan-200">
+              Q{questionNumber}
+            </span>
+          ) : null}
+          <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
+            {poll.is_closed ? "Closed" : "Live"}
+          </span>
+        </div>
         <h1 className="font-[family-name:var(--font-display)] text-2xl font-extrabold text-slate-50 sm:text-3xl">
           {poll.title}
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          {poll.is_closed ? "Closed" : "Live"} · {totalVotes} total votes
+          {totalVotes} total votes
+          {questionNumber >= 2 ? ` · Question #${questionNumber}` : ""}
         </p>
       </div>
 
@@ -145,16 +203,19 @@ export default function AdminPage() {
       <div className="mt-12">
         <button
           type="button"
-          disabled={closing || poll.is_closed}
-          onClick={() => void handleClose()}
-          className="w-full border-b border-rose-400/50 py-4 text-left text-base font-bold text-rose-200 transition hover:text-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={busy !== null}
+          onClick={() => void handleCloseAndNext()}
+          className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-orange-400 px-6 py-4 text-base font-bold text-slate-950 shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {poll.is_closed
-            ? "Poll Closed"
-            : closing
-              ? "Closing…"
-              : "🔒 Close Poll & Create Next"}
+          {busy === "next"
+            ? "Closing…"
+            : poll.is_closed
+              ? `🚀 Create Q${questionNumber + 1}`
+              : "🚀 Close & Next Question"}
         </button>
+        <p className="mt-3 text-center text-xs text-slate-500">
+          Keeps the same share / OBS URL for the next question in this stream.
+        </p>
       </div>
     </main>
   );
