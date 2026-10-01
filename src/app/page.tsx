@@ -246,6 +246,11 @@ export default function HomePage() {
               {submitting ? "Creating…" : "🚀 Share & Create Poll"}
             </button>
 
+            <div className={`space-y-1 pt-1 text-center text-xs ${create.subtitle}`}>
+              <p>★ Monetize your stream with Super Votes & Custom Avatars!</p>
+              <p className="opacity-80">Upgrade to Pro ($8/mo) — coming soon</p>
+            </div>
+
             <footer
               className={`space-y-2 pt-2 text-center text-xs ${create.subtitle}`}
             >

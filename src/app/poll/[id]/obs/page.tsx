@@ -9,7 +9,7 @@ import { getThemeVisuals } from "@/lib/themes";
 export default function ObsOverlayPage() {
   const params = useParams<{ id: string }>();
   const pollId = params.id;
-  const { poll, counts, totalVotes, loading, error, lastBumpedOptionId } =
+  const { poll, counts, totalVotes, loading, error, lastBumpedOptionId, votes } =
     useLivePoll(pollId);
   const visuals = getThemeVisuals(poll?.theme);
   const useLightPanel = visuals.obsLightPanel;
@@ -74,6 +74,8 @@ export default function ObsOverlayPage() {
           counts={counts}
           totalVotes={totalVotes}
           theme={poll.theme}
+          votesPerVoter={poll.max_votes_per_user}
+          votes={votes}
           bumpedOptionId={lastBumpedOptionId}
           transparent={!useLightPanel}
         />

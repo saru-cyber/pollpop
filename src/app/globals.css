@@ -35,3 +35,71 @@ html.obs-transparent body {
 input[type="radio"] {
   accent-color: #22d3ee;
 }
+
+/* Race mascot: just voted */
+@keyframes mascot-jump {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(-14px) scale(1.15);
+  }
+  50% {
+    transform: translateY(0) scale(1.05);
+  }
+  75% {
+    transform: translateY(-8px) scale(1.1);
+  }
+}
+
+/* Race mascot: chasing 2nd */
+@keyframes mascot-chase {
+  0%,
+  100% {
+    transform: translateX(0) rotate(-8deg);
+  }
+  50% {
+    transform: translateX(3px) rotate(-12deg);
+  }
+}
+
+/* Race mascot: sleeping */
+@keyframes mascot-sleep {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Rank speech bubble */
+@keyframes badge-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mascot-jump {
+  animation: mascot-jump 0.55s ease-out infinite;
+}
+
+.mascot-chase {
+  animation: mascot-chase 0.45s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.mascot-sleep {
+  animation: mascot-sleep 2.4s ease-in-out infinite;
+}
+
+.mascot-badge {
+  animation: badge-pop 0.35s ease-out both;
+}

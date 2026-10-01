@@ -27,7 +27,8 @@ export default function AdminPage() {
   const params = useParams<{ id: string }>();
   const pollId = params.id;
   const router = useRouter();
-  const { poll, counts, totalVotes, loading, error } = useLivePoll(pollId);
+  const { poll, counts, totalVotes, loading, error, votes, lastBumpedOptionId } =
+    useLivePoll(pollId);
   const [closing, setClosing] = useState(false);
   const baseUrl = useSyncExternalStore(
     subscribeNoop,
@@ -112,30 +113,17 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Share Link
-            </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <code className="flex-1 truncate border-b border-slate-700/60 py-2.5 text-xs text-cyan-200">
-                {voteUrl || "…"}
-              </code>
-              <CopyButton label="📋 Copy Link" value={voteUrl} />
-            </div>
-          </div>
-
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              OBS Overlay URL (Animal Race)
-            </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <code className="flex-1 truncate border-b border-slate-700/60 py-2.5 text-xs text-orange-200">
-                {obsUrl || "…"}
-              </code>
-              <CopyButton label="📋 Copy OBS Link" value={obsUrl} />
-            </div>
-          </div>
+        <div className="flex flex-col justify-center gap-3 sm:pt-6">
+          <CopyButton
+            label="📋 Copy Share Link"
+            value={voteUrl}
+            className="w-full sm:w-auto"
+          />
+          <CopyButton
+            label="🎥 Copy OBS Link"
+            value={obsUrl}
+            className="w-full bg-orange-400 hover:bg-orange-300 sm:w-auto"
+          />
         </div>
       </section>
 
@@ -148,10 +136,13 @@ export default function AdminPage() {
           counts={counts}
           totalVotes={totalVotes}
           theme={poll.theme}
+          votesPerVoter={poll.max_votes_per_user}
+          votes={votes}
+          bumpedOptionId={lastBumpedOptionId}
         />
       </section>
 
-      <div className="mt-12 flex flex-col gap-8">
+      <div className="mt-12">
         <button
           type="button"
           disabled={closing || poll.is_closed}
@@ -164,19 +155,6 @@ export default function AdminPage() {
               ? "Closing…"
               : "🔒 Close Poll & Create Next"}
         </button>
-
-        <div className="text-center sm:text-left">
-          <p className="text-sm text-slate-400">
-            ⭐ Monetize your stream with Super Votes & Custom Avatars!
-          </p>
-          <button
-            type="button"
-            className="mt-3 text-sm font-semibold text-cyan-300/90 underline-offset-4 hover:underline disabled:no-underline disabled:opacity-60"
-            disabled
-          >
-            Upgrade to Pro ($8/mo) — coming soon
-          </button>
-        </div>
       </div>
     </main>
   );
