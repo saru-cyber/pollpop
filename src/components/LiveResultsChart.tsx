@@ -90,13 +90,29 @@ export function LiveResultsChart({
       ? themeConfig.admin.chart
       : themeConfig.chart;
   const useAvatars = showAnimals ?? themeConfig.showAvatars;
+  const compactAdmin = surface === "admin";
   const maxVotesInPoll = Math.max(
     0,
     ...options.map((o) => counts[o.id] ?? 0),
   );
   const voterScale = votesPerVoter > 0 ? votesPerVoter * 2 : 0;
   const maxScale = Math.max(voterScale, maxVotesInPoll * 1.2, 1);
-  const barHeight = useAvatars ? "h-10" : "h-3";
+
+  const barHeight = compactAdmin
+    ? useAvatars
+      ? "h-7"
+      : "h-2.5"
+    : useAvatars
+      ? "h-10"
+      : "h-3";
+  const iconSize = compactAdmin ? "text-xl" : "text-2xl";
+  const rowGap = compactAdmin
+    ? "gap-1.5"
+    : useAvatars
+      ? "gap-6"
+      : "gap-4";
+  /** Admin: badge beside mascot (no tall top pad). Default/OBS: above. */
+  const labelPad = useAvatars && !compactAdmin ? "pt-6" : undefined;
 
   const [now, setNow] = useState(0);
   const [clockOrigin, setClockOrigin] = useState(0);
@@ -132,7 +148,6 @@ export function LiveResultsChart({
     return () => window.clearTimeout(frame);
   }, [bumpedOptionId]);
 
-  // Trigger / reset winner celebration with close & next question
   useEffect(() => {
     if (isClosed) {
       const t = window.setTimeout(() => setWinnerActive(true), 0);
@@ -160,24 +175,14 @@ export function LiveResultsChart({
     : chartTone.meta;
   const trackClass = transparent ? "bg-white/20" : chartTone.track;
   const emptyClass = transparent ? "text-white/70" : chartTone.empty;
-
   const badgeClass = themeConfig.vfx.mascotBadge;
-  const rowGap =
-    surface === "admin"
-      ? useAvatars
-        ? "gap-4"
-        : "gap-3"
-      : useAvatars
-        ? "gap-6"
-        : "gap-4";
-  const labelPad = useAvatars
-    ? surface === "admin"
-      ? "pt-5"
-      : "pt-6"
-    : undefined;
 
   return (
-    <div className={`relative flex flex-col ${rowGap}`}>
+    <div
+      className={`relative flex h-full min-h-0 flex-col ${
+        compactAdmin ? "justify-evenly overflow-hidden" : ""
+      } ${rowGap}`}
+    >
       <WinnerCelebration
         open={winnerActive}
         options={options}
@@ -236,21 +241,28 @@ export function LiveResultsChart({
         else if (isChasing) mascotAnim = "mascot-chase";
 
         return (
-          <div key={option.id} className="relative">
-            <div className="mb-1.5 flex items-baseline justify-between gap-3">
+          <div key={option.id} className="relative shrink-0">
+            <div
+              className={`flex items-baseline justify-between gap-2 ${
+                compactAdmin ? "mb-0.5" : "mb-1.5"
+              }`}
+            >
               <span
-                className={`relative z-10 min-w-0 truncate text-sm font-bold tracking-tight ${labelClass}`}
+                className={`relative z-10 min-w-0 truncate font-bold tracking-tight ${
+                  compactAdmin ? "text-xs" : "text-sm"
+                } ${labelClass}`}
               >
                 {option.text}
               </span>
               <span
-                className={`relative z-10 shrink-0 text-xs font-medium tabular-nums ${metaClass}`}
+                className={`relative z-10 shrink-0 font-medium tabular-nums ${
+                  compactAdmin ? "text-[10px]" : "text-xs"
+                } ${metaClass}`}
               >
                 {optionVotes} ({sharePct.toFixed(0)}%)
               </span>
             </div>
 
-            {/* Reserve vertical room so mascot badges never cover option labels */}
             <div className={labelPad}>
               <div
                 className={`relative overflow-visible rounded-full ${barHeight} ${trackClass}`}
@@ -266,7 +278,7 @@ export function LiveResultsChart({
                   <div
                     className="absolute top-1/2 z-10 -translate-y-1/2 transition-[left] duration-500 ease-out"
                     style={{
-                      left: `calc(${displayWidth}% - 1.1rem)`,
+                      left: `calc(${displayWidth}% - 1rem)`,
                     }}
                   >
                     <div className="relative">
@@ -277,14 +289,18 @@ export function LiveResultsChart({
                             initial={{ opacity: 0, y: 4, scale: 0.85 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className={`mascot-badge absolute bottom-full left-1/2 z-20 mb-1 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold leading-none ${badgeClass}`}
+                            className={`mascot-badge absolute z-20 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none ${badgeClass} ${
+                              compactAdmin
+                                ? "left-full top-1/2 ml-1 -translate-y-1/2"
+                                : "bottom-full left-1/2 mb-1 -translate-x-1/2"
+                            }`}
                           >
                             {badge}
                           </motion.span>
                         )}
                       </AnimatePresence>
                       <span
-                        className={`inline-block text-2xl drop-shadow-lg ${mascotAnim}`}
+                        className={`inline-block drop-shadow-lg ${iconSize} ${mascotAnim}`}
                         aria-hidden
                       >
                         {icon}
@@ -304,7 +320,7 @@ export function LiveResultsChart({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`text-center text-sm ${emptyClass}`}
+            className={`text-center ${compactAdmin ? "text-xs" : "text-sm"} ${emptyClass}`}
           >
             Waiting for votes…
           </motion.p>

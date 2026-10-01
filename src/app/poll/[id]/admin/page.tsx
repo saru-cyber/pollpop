@@ -1,9 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { BrandHeader } from "@/components/BrandHeader";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { CopyButton } from "@/components/CopyButton";
 import { LiveResultsChart } from "@/components/LiveResultsChart";
@@ -52,9 +52,15 @@ export default function AdminPage() {
   useEffect(() => {
     document.body.classList.add("admin-shell");
     document.documentElement.dataset.adminTheme = themeConfig.id;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.classList.remove("admin-shell");
       delete document.documentElement.dataset.adminTheme;
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
     };
   }, [themeConfig.id]);
 
@@ -159,112 +165,120 @@ export default function AdminPage() {
 
   return (
     <main
-      className={`${admin.bg} ${admin.text} min-h-screen lg:h-screen lg:max-h-screen lg:overflow-hidden`}
+      className={`${admin.bg} ${admin.text} h-screen max-h-screen overflow-hidden`}
       data-theme={themeConfig.id}
       data-admin-theme={themeConfig.id}
     >
-      <div className="mx-auto flex h-full w-full max-w-6xl flex-col px-4 py-5 sm:px-5 lg:px-6 lg:py-5">
-        <BrandHeader
-          className="mb-3 shrink-0 lg:mb-3"
-          brandClassName={admin.brand}
-          liveClassName={admin.live}
-          rightSlot={
-            <button
-              type="button"
-              disabled={busy !== null}
-              onClick={requestFinishStream}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${admin.finishBtn}`}
+      <div className="mx-auto flex h-full w-full max-w-6xl flex-col px-3 py-2 sm:px-4 lg:px-5 lg:py-2.5">
+        {/* Compact single-row header */}
+        <header className="flex shrink-0 items-center gap-2 py-2 sm:gap-3">
+          <Link
+            href="/"
+            className="group flex shrink-0 items-baseline gap-1"
+          >
+            <span
+              className={`font-[family-name:var(--font-display)] text-xl font-black tracking-tight transition sm:text-2xl ${admin.brand}`}
             >
-              {busy === "finish" ? "Finishing…" : "🛑 Finish Stream"}
-            </button>
-          }
-        />
+              PollPop
+            </span>
+            <span
+              className={`hidden text-[10px] font-medium uppercase tracking-widest sm:inline ${admin.live}`}
+            >
+              live
+            </span>
+          </Link>
 
-        <div className="mb-3 shrink-0 lg:mb-4">
-          <div className="mb-1 flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
             {questionNumber >= 2 ? (
               <span
-                className={`rounded-full border px-3 py-0.5 text-xs font-bold tracking-wide ${admin.badge}`}
+                className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wide ${admin.badge}`}
               >
                 Q{questionNumber}
               </span>
             ) : null}
             <span
-              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${admin.badge}`}
+              className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${admin.badge}`}
             >
-              {isVotingOpen ? "● Live" : "Closed"}
+              {isVotingOpen ? "Live" : "Closed"}
+            </span>
+            <h1
+              className={`min-w-0 truncate font-[family-name:var(--font-display)] text-lg font-extrabold leading-tight sm:text-xl ${admin.title}`}
+            >
+              {poll.title}
+            </h1>
+            <span className={`hidden shrink-0 text-xs sm:inline ${admin.meta}`}>
+              {totalVotes} votes
             </span>
           </div>
-          <h1
-            className={`font-[family-name:var(--font-display)] text-xl font-extrabold leading-tight sm:text-2xl ${admin.title}`}
-          >
-            {poll.title}
-          </h1>
-          <p className={`mt-0.5 text-sm ${admin.meta}`}>
-            {totalVotes} total votes
-            {questionNumber >= 2 ? ` · Question #${questionNumber}` : ""}
-          </p>
-        </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 lg:grid lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)] lg:gap-5">
-          {/* Left: QR / links / stream status */}
-          <aside
-            className={`${admin.cardBg} flex shrink-0 flex-col gap-4 lg:min-h-0 lg:overflow-y-auto`}
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={requestFinishStream}
+            className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition disabled:opacity-50 sm:px-3 sm:text-xs ${admin.finishBtn}`}
           >
-            <div>
+            {busy === "finish" ? "…" : "🛑 Finish Stream"}
+          </button>
+        </header>
+
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden lg:grid-cols-[minmax(200px,240px)_minmax(0,1fr)] lg:gap-4">
+          {/* Left: QR / links / status */}
+          <aside
+            className={`${admin.cardBg} flex min-h-0 shrink-0 flex-row items-center gap-2.5 overflow-hidden !p-2.5 lg:flex-col lg:justify-between lg:gap-3 lg:!p-3`}
+          >
+            <div className="hidden w-full lg:block">
               <p
-                className={`mb-1 text-[10px] font-bold uppercase tracking-wider ${admin.label}`}
+                className={`text-[10px] font-bold uppercase tracking-wider ${admin.label}`}
               >
                 Stream status
               </p>
-              <p className={`text-sm font-semibold ${admin.title}`}>
-                {isVotingOpen ? "Voting open" : "Voting closed · Winner reveal"}
-              </p>
-              <p className={`mt-1 text-xs ${admin.meta}`}>
-                Same share / OBS URL for every question in this room.
+              <p className={`mt-0.5 text-sm font-semibold ${admin.title}`}>
+                {isVotingOpen ? "Voting open" : "Voting closed"}
               </p>
             </div>
 
-            <div className="flex flex-col items-center gap-2 sm:items-start">
+            <div className="flex shrink-0 flex-col items-center gap-1">
               <p
-                className={`text-xs font-semibold uppercase tracking-wider ${admin.label}`}
+                className={`hidden text-[10px] font-semibold uppercase tracking-wider lg:block ${admin.label}`}
               >
-                QR Code for Voters
+                QR for Voters
               </p>
-              <div className="rounded-xl bg-white p-2.5 shadow-sm">
+              <div className="rounded-lg bg-white p-1 shadow-sm lg:p-1.5">
                 {voteUrl ? (
-                  <QRCodeSVG value={voteUrl} size={148} level="M" />
+                  <div className="h-20 w-20 lg:h-32 lg:w-32">
+                    <QRCodeSVG value={voteUrl} size={128} level="M" className="h-full w-full" />
+                  </div>
                 ) : (
-                  <div className="h-[148px] w-[148px] animate-pulse bg-slate-200" />
+                  <div className="h-20 w-20 animate-pulse bg-slate-200 lg:h-32 lg:w-32" />
                 )}
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5 lg:w-full lg:flex-none">
               <CopyButton
                 label="📋 Copy Share Link"
                 value={voteUrl}
-                className={`w-full ${admin.shareBtn}`}
+                className={`w-full px-2 py-1.5 text-[11px] sm:text-xs lg:px-3 lg:py-2 ${admin.shareBtn}`}
               />
               <CopyButton
                 label="🎥 Copy OBS Link"
                 value={obsUrl}
-                className={`w-full ${admin.obsBtn}`}
+                className={`w-full px-2 py-1.5 text-[11px] sm:text-xs lg:px-3 lg:py-2 ${admin.obsBtn}`}
               />
             </div>
           </aside>
 
-          {/* Right: Live Results + progress CTA */}
-          <section className="flex min-h-0 flex-1 flex-col gap-3">
+          {/* Right: Live Results + CTA — no internal scroll */}
+          <section className="flex min-h-0 flex-col gap-2 overflow-hidden">
             <div
-              className={`${admin.cardBg} flex min-h-0 flex-1 flex-col overflow-hidden !p-4`}
+              className={`${admin.cardBg} flex min-h-0 flex-1 flex-col overflow-hidden !p-3`}
             >
               <h2
-                className={`mb-3 shrink-0 font-[family-name:var(--font-display)] text-base font-bold sm:text-lg ${admin.title}`}
+                className={`mb-2 shrink-0 font-[family-name:var(--font-display)] text-sm font-bold ${admin.title}`}
               >
                 📊 Live Results
               </h2>
-              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+              <div className="min-h-0 flex-1 overflow-hidden">
                 <LiveResultsChart
                   options={poll.options}
                   counts={counts}
@@ -280,12 +294,12 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="shrink-0 pb-1">
+            <div className="shrink-0">
               <button
                 type="button"
                 disabled={busy !== null}
                 onClick={requestPrimaryAction}
-                className={`w-full rounded-2xl px-5 py-3.5 text-base font-bold shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`w-full rounded-xl px-4 py-2.5 text-sm font-bold shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 sm:py-3 sm:text-base ${
                   poll.is_closed
                     ? admin.nextQuestionBtn
                     : admin.finishVotingBtn
@@ -299,10 +313,10 @@ export default function AdminPage() {
                       ? "🚀 Next Question"
                       : "🏁 Finish Voting"}
               </button>
-              <p className={`mt-2 text-center text-xs ${admin.hint}`}>
+              <p className={`mt-1 text-center text-[10px] leading-snug ${admin.hint}`}>
                 {poll.is_closed
-                  ? "Winner reveal stays on OBS until you start the next question."
-                  : "Closes voting and plays the winner celebration — watch it before Next Question."}
+                  ? "Winner stays on OBS until Next Question."
+                  : "Finish voting to reveal the winner, then Next Question."}
               </p>
             </div>
           </section>
