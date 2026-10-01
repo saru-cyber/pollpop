@@ -16,8 +16,8 @@ export type ThemeDefinition = {
   freeTrialAllowed?: boolean;
 };
 
-/** 1 | 3 | 5 | 10 | 12 | -1 (Unlimited) */
-export type MaxVotesPerUser = 1 | 3 | 5 | 10 | 12 | -1;
+/** 1 | 3 | 5 | 10 | 12 */
+export type MaxVotesPerUser = 1 | 3 | 5 | 10 | 12;
 
 export const MAX_VOTES_OPTIONS: { value: MaxVotesPerUser; label: string }[] = [
   { value: 1, label: "1 Vote" },
@@ -25,7 +25,6 @@ export const MAX_VOTES_OPTIONS: { value: MaxVotesPerUser; label: string }[] = [
   { value: 5, label: "5 Votes (Default)" },
   { value: 10, label: "10 Votes" },
   { value: 12, label: "12 Votes" },
-  { value: -1, label: "Unlimited" },
 ];
 
 /** Free: dark/light/game/party · Pro: animal_race (Free Trial allowed) */

@@ -14,7 +14,7 @@ type LiveResultsChartProps = {
   counts: VoteCounts;
   totalVotes: number;
   theme?: PollTheme | string;
-  /** Votes-per-voter limit (-1 = unlimited) */
+  /** Votes-per-voter limit */
   votesPerVoter?: number;
   votes?: Vote[];
   showAnimals?: boolean;
