@@ -5,27 +5,40 @@ import Link from "next/link";
 
 export function BrandHeader({
   rightSlot,
+  title,
+  titleClassName = "text-slate-400",
   brandClassName = "text-cyan-300 group-hover:text-cyan-200",
   liveClassName = "text-slate-500",
 }: {
   rightSlot?: ReactNode;
+  title?: ReactNode;
+  titleClassName?: string;
   brandClassName?: string;
   liveClassName?: string;
 }) {
   return (
-    <header className="mb-8 flex items-center justify-between gap-4">
-      <Link href="/" className="group flex items-baseline gap-1">
-        <span
-          className={`font-[family-name:var(--font-display)] text-3xl font-black tracking-tight transition ${brandClassName}`}
-        >
-          PollPop
-        </span>
-        <span
-          className={`text-xs font-medium uppercase tracking-widest ${liveClassName}`}
-        >
-          live
-        </span>
-      </Link>
+    <header className="mb-8 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+      <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+        <Link href="/" className="group flex shrink-0 items-baseline gap-1">
+          <span
+            className={`font-[family-name:var(--font-display)] text-3xl font-black tracking-tight transition ${brandClassName}`}
+          >
+            PollPop
+          </span>
+          <span
+            className={`text-xs font-medium uppercase tracking-widest ${liveClassName}`}
+          >
+            live
+          </span>
+        </Link>
+        {title ? (
+          <h1
+            className={`min-w-0 font-[family-name:var(--font-display)] text-sm font-semibold tracking-tight sm:text-base ${titleClassName}`}
+          >
+            {title}
+          </h1>
+        ) : null}
+      </div>
       {rightSlot}
     </header>
   );

@@ -125,19 +125,12 @@ export default function HomePage() {
         <BrandHeader
           brandClassName={create.brand}
           liveClassName={create.live}
+          title="Create a live poll in 5 seconds"
+          titleClassName={create.subtitle}
         />
 
         <section>
-          <h1
-            className={`font-[family-name:var(--font-display)] text-2xl font-extrabold tracking-tight sm:text-3xl ${create.title}`}
-          >
-            Create a live poll in 5 seconds
-          </h1>
-          <p className={`mt-2 text-sm ${create.subtitle}`}>
-            Free plan: one active poll at a time. Close it to create the next.
-          </p>
-
-          <form onSubmit={(e) => void onSubmit(e)} className="mt-8 space-y-6">
+          <form onSubmit={(e) => void onSubmit(e)} className="space-y-6">
             <label className="block space-y-2">
               <span
                 className={`text-xs font-semibold uppercase tracking-wider ${create.label}`}
@@ -252,6 +245,21 @@ export default function HomePage() {
             >
               {submitting ? "Creating…" : "🚀 Share & Create Poll"}
             </button>
+
+            <footer
+              className={`space-y-2 pt-2 text-center text-xs ${create.subtitle}`}
+            >
+              <p>Free plan: one active poll at a time. Close it to create the next.</p>
+              <p>
+                © PollPop 2026 |{" "}
+                <a
+                  href="/terms"
+                  className="underline-offset-2 transition hover:underline"
+                >
+                  Terms
+                </a>
+              </p>
+            </footer>
           </form>
         </section>
       </div>
