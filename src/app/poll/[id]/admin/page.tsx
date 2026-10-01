@@ -4,6 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { BrandHeader } from "@/components/BrandHeader";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { CopyButton } from "@/components/CopyButton";
 import { LiveResultsChart } from "@/components/LiveResultsChart";
 import { getAppBaseUrl, getConfiguredAppUrl } from "@/lib/app-url";
@@ -27,6 +28,8 @@ function readServerBaseUrl() {
   return getConfiguredAppUrl() ?? "";
 }
 
+type DialogKind = "next" | "finish" | null;
+
 export default function AdminPage() {
   const params = useParams<{ id: string }>();
   const pollId = params.id;
@@ -34,6 +37,7 @@ export default function AdminPage() {
   const { poll, counts, totalVotes, loading, error, votes, lastBumpedOptionId } =
     useLivePoll(pollId);
   const [busy, setBusy] = useState<"next" | "finish" | null>(null);
+  const [dialog, setDialog] = useState<DialogKind>(null);
   const baseUrl = useSyncExternalStore(
     subscribeNoop,
     readClientBaseUrl,
@@ -49,16 +53,7 @@ export default function AdminPage() {
     [baseUrl, pollId],
   );
 
-  async function handleCloseAndNext() {
-    if (
-      poll &&
-      !poll.is_closed &&
-      !confirm(
-        "Close this question and create the next one in the same room (same share / OBS URL)?",
-      )
-    ) {
-      return;
-    }
+  async function runCloseAndNext() {
     setBusy("next");
     try {
       if (poll && !poll.is_closed) {
@@ -70,17 +65,11 @@ export default function AdminPage() {
     } catch (e) {
       alert(e instanceof Error ? e.message : "Failed to close poll");
       setBusy(null);
+      setDialog(null);
     }
   }
 
-  async function handleFinishStream() {
-    if (
-      !confirm(
-        "Finish this stream? You'll leave this room and create a brand-new poll URL next time.",
-      )
-    ) {
-      return;
-    }
+  async function runFinishStream() {
     setBusy("finish");
     try {
       if (poll && !poll.is_closed) {
@@ -91,7 +80,21 @@ export default function AdminPage() {
     } catch (e) {
       alert(e instanceof Error ? e.message : "Failed to finish stream");
       setBusy(null);
+      setDialog(null);
     }
+  }
+
+  function requestCloseAndNext() {
+    // Already closed → go straight to next-question compose
+    if (poll?.is_closed) {
+      void runCloseAndNext();
+      return;
+    }
+    setDialog("next");
+  }
+
+  function requestFinishStream() {
+    setDialog("finish");
   }
 
   if (loading) {
@@ -129,7 +132,7 @@ export default function AdminPage() {
           <button
             type="button"
             disabled={busy !== null}
-            onClick={() => void handleFinishStream()}
+            onClick={requestFinishStream}
             className="rounded-full border border-slate-600/70 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-rose-400/40 hover:text-rose-200 disabled:opacity-50"
           >
             {busy === "finish" ? "Finishing…" : "🛑 Finish Stream"}
@@ -204,7 +207,7 @@ export default function AdminPage() {
         <button
           type="button"
           disabled={busy !== null}
-          onClick={() => void handleCloseAndNext()}
+          onClick={requestCloseAndNext}
           className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-orange-400 px-6 py-4 text-base font-bold text-slate-950 shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy === "next"
@@ -217,6 +220,26 @@ export default function AdminPage() {
           Keeps the same share / OBS URL for the next question in this stream.
         </p>
       </div>
+
+      <ConfirmDialog
+        open={dialog === "next"}
+        title="Close & Next Question"
+        description="Close this question and create the next one in the same room. Share link and OBS URL stay the same."
+        confirmLabel="🚀 Next Question"
+        busy={busy === "next"}
+        onCancel={() => setDialog(null)}
+        onConfirm={() => void runCloseAndNext()}
+      />
+
+      <ConfirmDialog
+        open={dialog === "finish"}
+        title="Finish Stream"
+        description="End this stream session? You'll leave this room and create a brand-new poll URL next time."
+        confirmLabel="🛑 Finish Stream"
+        busy={busy === "finish"}
+        onCancel={() => setDialog(null)}
+        onConfirm={() => void runFinishStream()}
+      />
     </main>
   );
 }
