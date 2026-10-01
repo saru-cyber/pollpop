@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSupabase } from "@/lib/supabase/client";
 import { aggregateCounts, fetchPoll, fetchVotes } from "@/lib/polls";
+import { normalizeTheme } from "@/lib/themes";
 import type { Poll, Vote, VoteCounts } from "@/types/poll";
 
 type UseLivePollResult = {
@@ -104,6 +105,7 @@ export function useLivePoll(pollId: string): UseLivePollResult {
             const row = payload.new as Poll;
             setPoll({
               ...row,
+              theme: normalizeTheme(row.theme),
               options: row.options,
               manual_votes: row.manual_votes ?? {},
             });

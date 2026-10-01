@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase/client";
+import { normalizeTheme } from "@/lib/themes";
 import type {
   CreatePollInput,
   Poll,
@@ -13,7 +14,7 @@ function normalizePoll(row: Record<string, unknown>): Poll {
     user_id: (row.user_id as string | null) ?? null,
     title: row.title as string,
     options: row.options as PollOption[],
-    theme: (row.theme as Poll["theme"]) ?? "animal_race",
+    theme: normalizeTheme(row.theme),
     max_votes_per_user: (row.max_votes_per_user as number) ?? 5,
     is_closed: Boolean(row.is_closed),
     enable_super_votes: Boolean(row.enable_super_votes),
@@ -31,7 +32,7 @@ export async function createPoll(input: CreatePollInput): Promise<Poll> {
       title: input.title || "Untitled Poll",
       options: input.options,
       max_votes_per_user: input.max_votes_per_user,
-      theme: "animal_race",
+      theme: input.theme,
       user_id: null,
       is_closed: false,
       enable_super_votes: false,
@@ -39,7 +40,6 @@ export async function createPoll(input: CreatePollInput): Promise<Poll> {
     })
     .select()
     .single();
-
   if (error) throw new Error(error.message);
   return normalizePoll(data);
 }

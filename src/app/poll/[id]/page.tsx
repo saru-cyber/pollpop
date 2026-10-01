@@ -9,7 +9,7 @@ import {
 } from "@/lib/poll-storage";
 import { castVote } from "@/lib/polls";
 import { useLivePoll } from "@/lib/hooks/useLivePoll";
-import { ANIMAL_ICONS } from "@/types/poll";
+import { getOptionIcon, getThemeVisuals } from "@/lib/themes";
 
 const COMBO_WINDOW_MS = 1800;
 
@@ -30,6 +30,7 @@ export default function VotePage() {
   const [voteError, setVoteError] = useState<string | null>(null);
   const [lastTapAt, setLastTapAt] = useState(0);
 
+  const visuals = getThemeVisuals(poll?.theme);
   const maxVotes = poll?.max_votes_per_user ?? 5;
   const unlimited = maxVotes === -1;
   const remaining = unlimited ? Infinity : Math.max(0, maxVotes - votedCount);
@@ -87,17 +88,25 @@ export default function VotePage() {
   }
 
   return (
-    <main className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col px-4 py-8">
+    <main
+      className={`relative mx-auto flex min-h-screen w-full max-w-lg flex-col px-4 py-8 ${visuals.vote.page}`}
+    >
       <ComboPopup combo={combo} />
 
       <div className="mb-2 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400/80">
+        <p
+          className={`text-xs font-semibold uppercase tracking-[0.2em] ${visuals.vote.brand}`}
+        >
           PollPop
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight text-slate-50 sm:text-3xl">
+        <h1
+          className={`mt-2 font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight sm:text-3xl ${visuals.vote.title}`}
+        >
           {poll.title}
         </h1>
-        <p className="mt-3 text-sm font-medium text-slate-300">{remainingLabel}</p>
+        <p className={`mt-3 text-sm font-medium ${visuals.vote.meta}`}>
+          {remainingLabel}
+        </p>
         {poll.is_closed && (
           <p className="mt-2 rounded-xl bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
             This poll is closed.
@@ -112,7 +121,7 @@ export default function VotePage() {
 
       <div className="mt-6 flex flex-1 flex-col gap-3">
         {poll.options.map((option, index) => {
-          const animal = ANIMAL_ICONS[index % ANIMAL_ICONS.length];
+          const icon = getOptionIcon(poll.theme, index);
           const busy = votingOptionId === option.id;
 
           return (
@@ -121,9 +130,9 @@ export default function VotePage() {
               type="button"
               disabled={!canVote || votingOptionId !== null}
               onClick={() => void handleVote(option.id)}
-              className="min-h-[4.5rem] rounded-2xl border border-slate-600/80 bg-gradient-to-r from-slate-900 to-slate-800 px-5 py-4 text-left text-lg font-bold text-slate-50 shadow-lg shadow-black/20 transition active:scale-[0.98] enabled:hover:border-cyan-400/50 enabled:hover:from-slate-800 enabled:hover:to-slate-700 disabled:cursor-not-allowed disabled:opacity-45"
+              className={`min-h-[4.5rem] rounded-2xl border px-5 py-4 text-left text-lg font-bold shadow-lg shadow-black/10 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 ${visuals.vote.button}`}
             >
-              <span className="mr-3 text-2xl">{animal}</span>
+              {icon ? <span className="mr-3 text-2xl">{icon}</span> : null}
               {busy ? "Sending…" : option.text}
             </button>
           );
@@ -136,7 +145,7 @@ export default function VotePage() {
         </p>
       )}
 
-      <p className="mt-8 text-center text-xs text-slate-600">
+      <p className={`mt-8 text-center text-xs ${visuals.vote.footer}`}>
         Tap fast for COMBO! · Votes sync live to OBS
       </p>
     </main>

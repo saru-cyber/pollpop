@@ -147,7 +147,7 @@ export default function AdminPage() {
           options={poll.options}
           counts={counts}
           totalVotes={totalVotes}
-          showAnimals
+          theme={poll.theme}
         />
       </section>
 

@@ -4,7 +4,17 @@ export type PollOption = {
   text: string;
 };
 
-export type PollTheme = "animal_race" | "gacha" | "neon_rgb";
+export type PollTheme = "animal_race" | "dark" | "light" | "game" | "party";
+
+export type ThemeTier = "free" | "pro";
+
+export type ThemeDefinition = {
+  value: PollTheme;
+  label: string;
+  tier: ThemeTier;
+  /** Pro themes free users can still try */
+  freeTrialAllowed?: boolean;
+};
 
 /** 1 | 3 | 5 | 10 | 12 | -1 (Unlimited) */
 export type MaxVotesPerUser = 1 | 3 | 5 | 10 | 12 | -1;
@@ -18,7 +28,32 @@ export const MAX_VOTES_OPTIONS: { value: MaxVotesPerUser; label: string }[] = [
   { value: -1, label: "Unlimited" },
 ];
 
-export const ANIMAL_ICONS = ["🐕", "🐈", "🐇", "🐧", "🐆"] as const;
+/** Free: dark/light/game/party · Pro: animal_race (Free Trial allowed) */
+export const THEME_DEFINITIONS: ThemeDefinition[] = [
+  { value: "dark", label: "Minimal Dark", tier: "free" },
+  { value: "light", label: "Light Mode", tier: "free" },
+  { value: "game", label: "Game Mode", tier: "free" },
+  { value: "party", label: "Party Mode", tier: "free" },
+  {
+    value: "animal_race",
+    label: "Animal Race 🦊",
+    tier: "pro",
+    freeTrialAllowed: true,
+  },
+];
+
+export const THEME_OPTIONS: { value: PollTheme; label: string }[] =
+  THEME_DEFINITIONS.map(({ value, label }) => ({ value, label }));
+
+export const FREE_THEMES = THEME_DEFINITIONS.filter((t) => t.tier === "free").map(
+  (t) => t.value,
+);
+
+export const PRO_THEMES = THEME_DEFINITIONS.filter((t) => t.tier === "pro").map(
+  (t) => t.value,
+);
+
+export const ANIMAL_ICONS = ["🐶", "🐱", "🐰", "🦊", "🐻"] as const;
 
 export type Poll = {
   id: string;
@@ -57,6 +92,7 @@ export type CreatePollInput = {
   title: string;
   options: PollOption[];
   max_votes_per_user: MaxVotesPerUser;
+  theme: PollTheme;
 };
 
 /** Aggregated counts keyed by option id */
