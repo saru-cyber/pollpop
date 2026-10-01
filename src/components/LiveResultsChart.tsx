@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { WinnerCelebration } from "@/components/WinnerCelebration";
 import { getOptionIcon, getTheme } from "@/config/themes";
+import { isWinningOption, resolveWinners } from "@/lib/winners";
 import type { PollOption, PollTheme, Vote, VoteCounts } from "@/types/poll";
 
 const SLEEP_IDLE_MS = 30_000;
@@ -133,32 +134,23 @@ export function LiveResultsChart({
 
   // Trigger / reset winner celebration with close & next question
   useEffect(() => {
-    if (isClosed && totalVotes > 0) {
+    if (isClosed) {
       const t = window.setTimeout(() => setWinnerActive(true), 0);
       return () => window.clearTimeout(t);
     }
     const t = window.setTimeout(() => setWinnerActive(false), 0);
     return () => window.clearTimeout(t);
-  }, [isClosed, totalVotes, questionNumber]);
+  }, [isClosed, questionNumber]);
 
   const ranks = useMemo(
     () => computeRanks(options, counts, totalVotes),
     [options, counts, totalVotes],
   );
 
-  const winnerId = useMemo(() => {
-    if (totalVotes <= 0) return null;
-    let bestId: number | null = null;
-    let bestVotes = -1;
-    for (const option of options) {
-      const v = counts[option.id] ?? 0;
-      if (v > bestVotes) {
-        bestVotes = v;
-        bestId = option.id;
-      }
-    }
-    return bestId;
-  }, [options, counts, totalVotes]);
+  const winnerResult = useMemo(
+    () => resolveWinners(options, counts, theme, useAvatars),
+    [options, counts, theme, useAvatars],
+  );
 
   const labelClass = transparent
     ? "text-white drop-shadow"
@@ -211,8 +203,11 @@ export function LiveResultsChart({
           !winnerActive && (jumpUntil[option.id] ?? 0) > now;
         const isChasing =
           !winnerActive && rank === "second" && !isSleeping && !isJumping;
-        const isWinnerBar =
-          winnerActive && !useAvatars && option.id === winnerId;
+        const isWinnerOption =
+          winnerActive && isWinningOption(winnerResult, option.id);
+        const isWinnerBar = isWinnerOption;
+        const displayWidth =
+          isWinnerBar && optionVotes === 0 ? 100 : widthPercent;
 
         let badge: string | null = null;
         if (!winnerActive) {
@@ -222,7 +217,8 @@ export function LiveResultsChart({
         }
 
         let mascotAnim = "";
-        if (isJumping) mascotAnim = "mascot-jump";
+        if (isWinnerOption) mascotAnim = "mascot-winner";
+        else if (isJumping) mascotAnim = "mascot-jump";
         else if (isSleeping) mascotAnim = "mascot-sleep";
         else if (isChasing) mascotAnim = "mascot-chase";
 
@@ -250,14 +246,14 @@ export function LiveResultsChart({
                   className={`absolute inset-y-0 left-0 rounded-full transition-[width] duration-500 ease-out ${
                     isWinnerBar ? "winner-bar-pulse" : barColor
                   }`}
-                  style={{ width: `${widthPercent}%` }}
+                  style={{ width: `${displayWidth}%` }}
                 />
 
-                {useAvatars && icon && !winnerActive && (
+                {useAvatars && icon && (!winnerActive || isWinnerOption) && (
                   <div
                     className="absolute top-1/2 z-10 -translate-y-1/2 transition-[left] duration-500 ease-out"
                     style={{
-                      left: `calc(${widthPercent}% - 1.1rem)`,
+                      left: `calc(${displayWidth}% - 1.1rem)`,
                     }}
                   >
                     <div className="relative">
