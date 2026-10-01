@@ -29,7 +29,8 @@ function readServerBaseUrl() {
   return getConfiguredAppUrl() ?? "";
 }
 
-type DialogKind = "next" | "finish" | null;
+type DialogKind = "finishVoting" | "next" | "finish" | null;
+type BusyKind = "closing" | "next" | "finish" | null;
 
 export default function AdminPage() {
   const params = useParams<{ id: string }>();
@@ -37,7 +38,7 @@ export default function AdminPage() {
   const router = useRouter();
   const { poll, counts, totalVotes, loading, error, votes, lastBumpedOptionId } =
     useLivePoll(pollId);
-  const [busy, setBusy] = useState<"next" | "finish" | null>(null);
+  const [busy, setBusy] = useState<BusyKind>(null);
   const [dialog, setDialog] = useState<DialogKind>(null);
   const baseUrl = useSyncExternalStore(
     subscribeNoop,
@@ -66,17 +67,29 @@ export default function AdminPage() {
     [baseUrl, pollId],
   );
 
-  async function runCloseAndNext() {
+  /** Stage 1: close voting, stay on page so winner FX can play on admin + OBS */
+  async function runFinishVoting() {
+    setBusy("closing");
+    try {
+      await closePoll(pollId);
+      setDialog(null);
+      setBusy(null);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to finish voting");
+      setBusy(null);
+      setDialog(null);
+    }
+  }
+
+  /** Stage 2: leave celebration and compose the next question (same room) */
+  async function runNextQuestion() {
     setBusy("next");
     try {
-      if (poll && !poll.is_closed) {
-        await closePoll(pollId);
-      }
       setActivePollId(pollId);
       setSessionPhase("compose_next");
       router.push(`/poll/${pollId}/next`);
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Failed to close poll");
+      alert(e instanceof Error ? e.message : "Failed to open next question");
       setBusy(null);
       setDialog(null);
     }
@@ -97,13 +110,12 @@ export default function AdminPage() {
     }
   }
 
-  function requestCloseAndNext() {
-    // Already closed → go straight to next-question compose
+  function requestPrimaryAction() {
     if (poll?.is_closed) {
-      void runCloseAndNext();
+      setDialog("next");
       return;
     }
-    setDialog("next");
+    setDialog("finishVoting");
   }
 
   function requestFinishStream() {
@@ -248,28 +260,44 @@ export default function AdminPage() {
           <button
             type="button"
             disabled={busy !== null}
-            onClick={requestCloseAndNext}
-            className={`w-full rounded-2xl px-6 py-4 text-base font-bold shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 ${admin.cta}`}
+            onClick={requestPrimaryAction}
+            className={`w-full rounded-2xl px-6 py-4 text-base font-bold shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 ${
+              poll.is_closed ? admin.nextQuestionBtn : admin.finishVotingBtn
+            }`}
           >
-            {busy === "next"
-              ? "Closing…"
-              : poll.is_closed
-                ? `🚀 Create Q${questionNumber + 1}`
-                : "🚀 Close & Next Question"}
+            {busy === "closing"
+              ? "Finishing voting…"
+              : busy === "next"
+                ? "Opening…"
+                : poll.is_closed
+                  ? "🚀 Next Question"
+                  : "🏁 Finish Voting"}
           </button>
           <p className={`mt-3 text-center text-xs ${admin.hint}`}>
-            Keeps the same share / OBS URL for the next question in this stream.
+            {poll.is_closed
+              ? "Winner reveal stays on OBS until you start the next question. Same share / OBS URL."
+              : "Closes voting and plays the winner celebration on OBS — watch it with your chat before Next Question."}
           </p>
         </div>
 
         <ConfirmDialog
+          open={dialog === "finishVoting"}
+          title="Finish Voting?"
+          description="Close this question and reveal the winner. Stay on this page to watch the celebration with your stream before starting the next question."
+          confirmLabel="🏁 Finish Voting"
+          busy={busy === "closing"}
+          onCancel={() => setDialog(null)}
+          onConfirm={() => void runFinishVoting()}
+        />
+
+        <ConfirmDialog
           open={dialog === "next"}
-          title="Close & Next Question"
-          description="Close this question and create the next one in the same room. Share link and OBS URL stay the same."
+          title="Next Question?"
+          description="Leave the winner reveal and create the next question in the same room. Share link and OBS URL stay the same."
           confirmLabel="🚀 Next Question"
           busy={busy === "next"}
           onCancel={() => setDialog(null)}
-          onConfirm={() => void runCloseAndNext()}
+          onConfirm={() => void runNextQuestion()}
         />
 
         <ConfirmDialog

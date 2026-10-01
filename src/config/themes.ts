@@ -39,6 +39,10 @@ export type ThemeConfig = {
     finishBtn: string;
     shareBtn: string;
     obsBtn: string;
+    /** Stage 1: close voting & reveal winner (flag / entertainment, not stop-red) */
+    finishVotingBtn: string;
+    /** Stage 2: go to next question compose */
+    nextQuestionBtn: string;
     cta: string;
     chart: ChartTone;
   };
@@ -123,6 +127,10 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
         "border-slate-600/70 text-slate-400 hover:border-rose-400/40 hover:text-rose-200",
       shareBtn: "bg-cyan-500 hover:bg-cyan-400 text-slate-950",
       obsBtn: "bg-orange-400 hover:bg-orange-300 text-slate-950",
+      finishVotingBtn:
+        "bg-gradient-to-r from-amber-300 via-yellow-300 to-lime-300 text-slate-950 shadow-amber-900/30",
+      nextQuestionBtn:
+        "bg-gradient-to-r from-cyan-400 to-sky-300 text-slate-950 shadow-cyan-900/30",
       cta: "bg-gradient-to-r from-slate-100 to-zinc-300 text-slate-950",
       chart: {
         label: "text-slate-100",
@@ -210,6 +218,10 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
         "border-slate-300 text-slate-500 hover:border-rose-300 hover:text-rose-500",
       shareBtn: "bg-sky-500 hover:bg-sky-400 text-white",
       obsBtn: "bg-orange-400 hover:bg-orange-300 text-slate-950",
+      finishVotingBtn:
+        "bg-gradient-to-r from-amber-400 via-yellow-400 to-lime-400 text-slate-900 shadow-amber-200/50",
+      nextQuestionBtn:
+        "bg-gradient-to-r from-sky-500 to-emerald-400 text-white shadow-sky-200/50",
       cta: "bg-gradient-to-r from-sky-500 to-emerald-400 text-white",
       chart: {
         label: "text-slate-800",
@@ -297,6 +309,10 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
         "border-fuchsia-500/40 text-fuchsia-200/80 hover:border-rose-400/50 hover:text-rose-200",
       shareBtn: "bg-fuchsia-500 hover:bg-fuchsia-400 text-white",
       obsBtn: "bg-lime-400 hover:bg-lime-300 text-slate-950",
+      finishVotingBtn:
+        "bg-gradient-to-r from-yellow-300 via-lime-400 to-cyan-400 text-slate-950 shadow-lime-900/40",
+      nextQuestionBtn:
+        "bg-gradient-to-r from-fuchsia-500 via-violet-500 to-lime-400 text-slate-950",
       cta: "bg-gradient-to-r from-fuchsia-500 via-violet-500 to-lime-400 text-slate-950",
       chart: {
         label: "text-lime-100",
@@ -386,6 +402,10 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
         "border-pink-200 text-rose-400 hover:border-rose-400 hover:text-rose-600",
       shareBtn: "bg-pink-500 hover:bg-pink-400 text-white",
       obsBtn: "bg-amber-400 hover:bg-amber-300 text-fuchsia-950",
+      finishVotingBtn:
+        "bg-gradient-to-r from-amber-300 via-yellow-300 to-lime-300 text-fuchsia-950 shadow-amber-200/50",
+      nextQuestionBtn:
+        "bg-gradient-to-r from-pink-500 via-amber-400 to-cyan-400 text-white",
       cta: "bg-gradient-to-r from-pink-500 via-amber-400 to-cyan-400 text-white",
       chart: {
         label: "text-fuchsia-900",
@@ -478,6 +498,10 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       shareBtn:
         "bg-emerald-400 hover:bg-emerald-300 text-emerald-950 shadow-emerald-900/20",
       obsBtn: "bg-amber-400 hover:bg-amber-300 text-amber-950",
+      finishVotingBtn:
+        "bg-gradient-to-r from-amber-300 via-lime-300 to-emerald-400 text-emerald-950 shadow-amber-900/25",
+      nextQuestionBtn:
+        "bg-gradient-to-r from-lime-400 via-emerald-400 to-cyan-300 text-emerald-950 shadow-emerald-900/30",
       cta: "bg-gradient-to-r from-lime-400 via-emerald-400 to-amber-300 text-emerald-950 shadow-emerald-900/30",
       chart: {
         label: "text-lime-100",
