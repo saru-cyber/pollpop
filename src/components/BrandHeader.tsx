@@ -9,15 +9,19 @@ export function BrandHeader({
   titleClassName = "text-slate-400",
   brandClassName = "text-cyan-300 group-hover:text-cyan-200",
   liveClassName = "text-slate-500",
+  className = "mb-8",
 }: {
   rightSlot?: ReactNode;
   title?: ReactNode;
   titleClassName?: string;
   brandClassName?: string;
   liveClassName?: string;
+  className?: string;
 }) {
   return (
-    <header className="mb-8 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+    <header
+      className={`flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 ${className}`}
+    >
       <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
         <Link href="/" className="group flex shrink-0 items-baseline gap-1">
           <span

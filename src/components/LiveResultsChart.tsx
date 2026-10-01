@@ -162,9 +162,22 @@ export function LiveResultsChart({
   const emptyClass = transparent ? "text-white/70" : chartTone.empty;
 
   const badgeClass = themeConfig.vfx.mascotBadge;
+  const rowGap =
+    surface === "admin"
+      ? useAvatars
+        ? "gap-4"
+        : "gap-3"
+      : useAvatars
+        ? "gap-6"
+        : "gap-4";
+  const labelPad = useAvatars
+    ? surface === "admin"
+      ? "pt-5"
+      : "pt-6"
+    : undefined;
 
   return (
-    <div className={`relative flex flex-col ${useAvatars ? "gap-6" : "gap-4"}`}>
+    <div className={`relative flex flex-col ${rowGap}`}>
       <WinnerCelebration
         open={winnerActive}
         options={options}
@@ -238,7 +251,7 @@ export function LiveResultsChart({
             </div>
 
             {/* Reserve vertical room so mascot badges never cover option labels */}
-            <div className={useAvatars ? "pt-6" : undefined}>
+            <div className={labelPad}>
               <div
                 className={`relative overflow-visible rounded-full ${barHeight} ${trackClass}`}
               >

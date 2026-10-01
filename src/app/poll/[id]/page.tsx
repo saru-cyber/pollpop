@@ -118,12 +118,12 @@ export default function VotePage() {
           {remainingLabel}
         </p>
         {poll.is_closed && (
-          <p className="mt-2 rounded-xl bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
+          <p className={`mt-2 ${vote.noticeClosed}`}>
             This question is closed. Waiting for the next one…
           </p>
         )}
         {!poll.is_closed && !canVote && (
-          <p className="mt-2 rounded-xl bg-amber-500/15 px-3 py-2 text-sm text-amber-100">
+          <p className={`mt-2 ${vote.noticeExhausted}`}>
             You&apos;ve used all your votes. Thanks for playing!
           </p>
         )}
@@ -150,9 +150,7 @@ export default function VotePage() {
       </div>
 
       {voteError && (
-        <p className="mt-4 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-          {voteError}
-        </p>
+        <p className={`mt-4 ${vote.noticeError}`}>{voteError}</p>
       )}
 
       <p className={`mt-8 text-center text-xs ${vote.footer}`}>

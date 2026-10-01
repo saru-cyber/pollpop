@@ -155,15 +155,17 @@ export default function AdminPage() {
   }
 
   const questionNumber = poll.question_number ?? 1;
+  const isVotingOpen = !poll.is_closed;
 
   return (
     <main
-      className={`${admin.bg} ${admin.text}`}
+      className={`${admin.bg} ${admin.text} min-h-screen lg:h-screen lg:max-h-screen lg:overflow-hidden`}
       data-theme={themeConfig.id}
       data-admin-theme={themeConfig.id}
     >
-      <div className="mx-auto w-full max-w-3xl px-4 py-10">
+      <div className="mx-auto flex h-full w-full max-w-6xl flex-col px-4 py-5 sm:px-5 lg:px-6 lg:py-5">
         <BrandHeader
+          className="mb-3 shrink-0 lg:mb-3"
           brandClassName={admin.brand}
           liveClassName={admin.live}
           rightSlot={
@@ -178,106 +180,132 @@ export default function AdminPage() {
           }
         />
 
-        <div className="mb-6">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
+        <div className="mb-3 shrink-0 lg:mb-4">
+          <div className="mb-1 flex flex-wrap items-center gap-2">
             {questionNumber >= 2 ? (
               <span
-                className={`rounded-full border px-3 py-1 text-xs font-bold tracking-wide ${admin.badge}`}
+                className={`rounded-full border px-3 py-0.5 text-xs font-bold tracking-wide ${admin.badge}`}
               >
                 Q{questionNumber}
               </span>
             ) : null}
             <span
-              className={`text-xs font-medium uppercase tracking-wider ${admin.label}`}
+              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${admin.badge}`}
             >
-              {poll.is_closed ? "Closed" : "Live"}
+              {isVotingOpen ? "● Live" : "Closed"}
             </span>
           </div>
           <h1
-            className={`font-[family-name:var(--font-display)] text-2xl font-extrabold sm:text-3xl ${admin.title}`}
+            className={`font-[family-name:var(--font-display)] text-xl font-extrabold leading-tight sm:text-2xl ${admin.title}`}
           >
             {poll.title}
           </h1>
-          <p className={`mt-1 text-sm ${admin.meta}`}>
+          <p className={`mt-0.5 text-sm ${admin.meta}`}>
             {totalVotes} total votes
             {questionNumber >= 2 ? ` · Question #${questionNumber}` : ""}
           </p>
         </div>
 
-        <section className={`${admin.cardBg} grid gap-8 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-10`}>
-          <div className="flex flex-col items-center gap-3 sm:items-start">
-            <p
-              className={`text-xs font-semibold uppercase tracking-wider ${admin.label}`}
-            >
-              QR Code for Voters
-            </p>
-            <div className="rounded-xl bg-white p-3 shadow-sm">
-              {voteUrl ? (
-                <QRCodeSVG value={voteUrl} size={160} level="M" />
-              ) : (
-                <div className="h-40 w-40 animate-pulse bg-slate-200" />
-              )}
+        <div className="flex min-h-0 flex-1 flex-col gap-4 lg:grid lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)] lg:gap-5">
+          {/* Left: QR / links / stream status */}
+          <aside
+            className={`${admin.cardBg} flex shrink-0 flex-col gap-4 lg:min-h-0 lg:overflow-y-auto`}
+          >
+            <div>
+              <p
+                className={`mb-1 text-[10px] font-bold uppercase tracking-wider ${admin.label}`}
+              >
+                Stream status
+              </p>
+              <p className={`text-sm font-semibold ${admin.title}`}>
+                {isVotingOpen ? "Voting open" : "Voting closed · Winner reveal"}
+              </p>
+              <p className={`mt-1 text-xs ${admin.meta}`}>
+                Same share / OBS URL for every question in this room.
+              </p>
             </div>
-          </div>
 
-          <div className="flex flex-col justify-center gap-3 sm:pt-6">
-            <CopyButton
-              label="📋 Copy Share Link"
-              value={voteUrl}
-              className={`w-full sm:w-auto ${admin.shareBtn}`}
-            />
-            <CopyButton
-              label="🎥 Copy OBS Link"
-              value={obsUrl}
-              className={`w-full sm:w-auto ${admin.obsBtn}`}
-            />
-          </div>
-        </section>
+            <div className="flex flex-col items-center gap-2 sm:items-start">
+              <p
+                className={`text-xs font-semibold uppercase tracking-wider ${admin.label}`}
+              >
+                QR Code for Voters
+              </p>
+              <div className="rounded-xl bg-white p-2.5 shadow-sm">
+                {voteUrl ? (
+                  <QRCodeSVG value={voteUrl} size={148} level="M" />
+                ) : (
+                  <div className="h-[148px] w-[148px] animate-pulse bg-slate-200" />
+                )}
+              </div>
+            </div>
 
-        <section className="mt-8">
-          <h2
-            className={`mb-4 font-[family-name:var(--font-display)] text-lg font-bold ${admin.title}`}
-          >
-            📊 Live Results
-          </h2>
-          <div className={admin.cardBg}>
-            <LiveResultsChart
-              options={poll.options}
-              counts={counts}
-              totalVotes={totalVotes}
-              theme={poll.theme}
-              surface="admin"
-              votesPerVoter={poll.max_votes_per_user}
-              votes={votes}
-              bumpedOptionId={lastBumpedOptionId}
-              isClosed={poll.is_closed}
-              questionNumber={poll.question_number}
-            />
-          </div>
-        </section>
+            <div className="flex flex-col gap-2">
+              <CopyButton
+                label="📋 Copy Share Link"
+                value={voteUrl}
+                className={`w-full ${admin.shareBtn}`}
+              />
+              <CopyButton
+                label="🎥 Copy OBS Link"
+                value={obsUrl}
+                className={`w-full ${admin.obsBtn}`}
+              />
+            </div>
+          </aside>
 
-        <div className="mt-10">
-          <button
-            type="button"
-            disabled={busy !== null}
-            onClick={requestPrimaryAction}
-            className={`w-full rounded-2xl px-6 py-4 text-base font-bold shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 ${
-              poll.is_closed ? admin.nextQuestionBtn : admin.finishVotingBtn
-            }`}
-          >
-            {busy === "closing"
-              ? "Finishing voting…"
-              : busy === "next"
-                ? "Opening…"
-                : poll.is_closed
-                  ? "🚀 Next Question"
-                  : "🏁 Finish Voting"}
-          </button>
-          <p className={`mt-3 text-center text-xs ${admin.hint}`}>
-            {poll.is_closed
-              ? "Winner reveal stays on OBS until you start the next question. Same share / OBS URL."
-              : "Closes voting and plays the winner celebration on OBS — watch it with your chat before Next Question."}
-          </p>
+          {/* Right: Live Results + progress CTA */}
+          <section className="flex min-h-0 flex-1 flex-col gap-3">
+            <div
+              className={`${admin.cardBg} flex min-h-0 flex-1 flex-col overflow-hidden !p-4`}
+            >
+              <h2
+                className={`mb-3 shrink-0 font-[family-name:var(--font-display)] text-base font-bold sm:text-lg ${admin.title}`}
+              >
+                📊 Live Results
+              </h2>
+              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+                <LiveResultsChart
+                  options={poll.options}
+                  counts={counts}
+                  totalVotes={totalVotes}
+                  theme={poll.theme}
+                  surface="admin"
+                  votesPerVoter={poll.max_votes_per_user}
+                  votes={votes}
+                  bumpedOptionId={lastBumpedOptionId}
+                  isClosed={poll.is_closed}
+                  questionNumber={poll.question_number}
+                />
+              </div>
+            </div>
+
+            <div className="shrink-0 pb-1">
+              <button
+                type="button"
+                disabled={busy !== null}
+                onClick={requestPrimaryAction}
+                className={`w-full rounded-2xl px-5 py-3.5 text-base font-bold shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 ${
+                  poll.is_closed
+                    ? admin.nextQuestionBtn
+                    : admin.finishVotingBtn
+                }`}
+              >
+                {busy === "closing"
+                  ? "Finishing voting…"
+                  : busy === "next"
+                    ? "Opening…"
+                    : poll.is_closed
+                      ? "🚀 Next Question"
+                      : "🏁 Finish Voting"}
+              </button>
+              <p className={`mt-2 text-center text-xs ${admin.hint}`}>
+                {poll.is_closed
+                  ? "Winner reveal stays on OBS until you start the next question."
+                  : "Closes voting and plays the winner celebration — watch it before Next Question."}
+              </p>
+            </div>
+          </section>
         </div>
 
         <ConfirmDialog

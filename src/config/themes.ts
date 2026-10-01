@@ -63,6 +63,10 @@ export type ThemeConfig = {
     meta: string;
     button: string;
     footer: string;
+    /** High-contrast status banners (closed / exhausted / error) */
+    noticeClosed: string;
+    noticeExhausted: string;
+    noticeError: string;
   };
   create: {
     bg: string;
@@ -155,6 +159,12 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       button:
         "border-slate-700 bg-slate-950 text-slate-100 enabled:hover:border-slate-500 enabled:hover:bg-slate-900",
       footer: "text-slate-700",
+      noticeClosed:
+        "rounded-xl border border-rose-400/50 bg-rose-950 px-3 py-2 text-sm font-semibold text-rose-100",
+      noticeExhausted:
+        "rounded-xl border border-amber-400/50 bg-amber-950 px-3 py-2 text-sm font-semibold text-amber-100",
+      noticeError:
+        "rounded-xl border border-rose-400/60 bg-rose-950 px-4 py-3 text-sm font-semibold text-rose-100",
     },
     create: {
       bg: "bg-[#050505] text-slate-100",
@@ -246,6 +256,12 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       button:
         "border-slate-300 bg-white text-slate-900 shadow-sm enabled:hover:border-sky-400 enabled:hover:bg-sky-50",
       footer: "text-slate-400",
+      noticeClosed:
+        "rounded-xl border border-rose-300 bg-rose-100 px-3 py-2 text-sm font-semibold text-rose-950",
+      noticeExhausted:
+        "rounded-xl border border-amber-300 bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-950",
+      noticeError:
+        "rounded-xl border border-rose-400 bg-rose-100 px-4 py-3 text-sm font-semibold text-rose-950",
     },
     create: {
       bg: "bg-[#f5f7fb] text-slate-900",
@@ -337,6 +353,12 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       button:
         "border-lime-400/40 bg-gradient-to-r from-indigo-950 to-slate-950 text-lime-50 enabled:hover:border-lime-300 enabled:hover:from-indigo-900",
       footer: "text-lime-900",
+      noticeClosed:
+        "rounded-xl border border-rose-400/50 bg-rose-950 px-3 py-2 text-sm font-semibold text-rose-100",
+      noticeExhausted:
+        "rounded-xl border border-amber-400/50 bg-amber-950 px-3 py-2 text-sm font-semibold text-amber-100",
+      noticeError:
+        "rounded-xl border border-rose-400/60 bg-rose-950 px-4 py-3 text-sm font-semibold text-rose-100",
     },
     create: {
       bg: "bg-[#0a0618] text-lime-50 bg-[radial-gradient(ellipse_70%_50%_at_15%_0%,rgba(168,85,247,0.28),transparent),radial-gradient(ellipse_50%_40%_at_90%_10%,rgba(34,197,94,0.16),transparent)]",
@@ -430,6 +452,12 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       button:
         "border-pink-300 bg-white text-fuchsia-950 shadow-md shadow-pink-200/50 enabled:hover:border-amber-400 enabled:hover:bg-amber-50",
       footer: "text-rose-400",
+      noticeClosed:
+        "rounded-xl border border-rose-400 bg-rose-100 px-3 py-2 text-sm font-semibold text-rose-950",
+      noticeExhausted:
+        "rounded-xl border border-amber-400 bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-950",
+      noticeError:
+        "rounded-xl border border-rose-500 bg-rose-100 px-4 py-3 text-sm font-semibold text-rose-950",
     },
     create: {
       bg: "bg-gradient-to-br from-white via-[#ffe8f3] to-[#fff3c4] text-fuchsia-950",
@@ -527,6 +555,12 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       button:
         "border-emerald-200 bg-white/90 text-emerald-950 shadow-sm shadow-emerald-200/40 enabled:hover:border-lime-400 enabled:hover:bg-lime-50",
       footer: "text-emerald-700/50",
+      noticeClosed:
+        "rounded-xl border border-rose-400 bg-rose-100 px-3 py-2 text-sm font-semibold text-rose-950",
+      noticeExhausted:
+        "rounded-xl border border-amber-500 bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-950",
+      noticeError:
+        "rounded-xl border border-rose-500 bg-rose-100 px-4 py-3 text-sm font-semibold text-rose-950",
     },
     create: {
       bg: "bg-gradient-to-br from-[#f4faf0] via-[#eef6e4] to-[#f8f1e2] text-emerald-950",
