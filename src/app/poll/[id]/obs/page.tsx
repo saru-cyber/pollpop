@@ -13,6 +13,7 @@ export default function ObsOverlayPage() {
     useLivePoll(pollId);
   const visuals = getThemeVisuals(poll?.theme);
   const useLightPanel = visuals.obsLightPanel;
+  const isAnimalRace = visuals.id === "animal_race";
 
   useEffect(() => {
     document.documentElement.classList.add("obs-transparent");
@@ -44,7 +45,9 @@ export default function ObsOverlayPage() {
       <div
         className={`mx-auto w-full max-w-3xl ${
           useLightPanel
-            ? "rounded-2xl bg-white/90 p-5 shadow-lg backdrop-blur"
+            ? isAnimalRace
+              ? "rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-[#f3faee]/95 via-[#f8f4e8]/95 to-[#e8f5e0]/95 p-5 shadow-lg shadow-emerald-200/30 backdrop-blur"
+              : "rounded-2xl bg-white/90 p-5 shadow-lg backdrop-blur"
             : ""
         }`}
       >
@@ -66,6 +69,7 @@ export default function ObsOverlayPage() {
           >
             {totalVotes} votes
             {poll.is_closed ? " · CLOSED" : ""}
+            {poll.question_number >= 2 ? ` · Q${poll.question_number}` : ""}
           </p>
         </div>
 
@@ -78,6 +82,8 @@ export default function ObsOverlayPage() {
           votes={votes}
           bumpedOptionId={lastBumpedOptionId}
           transparent={!useLightPanel}
+          isClosed={poll.is_closed}
+          questionNumber={poll.question_number}
         />
       </div>
     </main>

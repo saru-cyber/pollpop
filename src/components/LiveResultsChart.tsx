@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { WinnerCelebration } from "@/components/WinnerCelebration";
 import { getOptionIcon, getThemeVisuals } from "@/lib/themes";
 import type { PollOption, PollTheme, Vote, VoteCounts } from "@/types/poll";
 
@@ -19,6 +20,8 @@ type LiveResultsChartProps = {
   showAnimals?: boolean;
   bumpedOptionId?: number | null;
   transparent?: boolean;
+  isClosed?: boolean;
+  questionNumber?: number;
 };
 
 type RankKind = "first" | "second" | "lowest" | null;
@@ -74,6 +77,8 @@ export function LiveResultsChart({
   showAnimals,
   bumpedOptionId = null,
   transparent = false,
+  isClosed = false,
+  questionNumber = 1,
 }: LiveResultsChartProps) {
   const visuals = getThemeVisuals(theme);
   const useAvatars = showAnimals ?? visuals.showAvatars;
@@ -91,6 +96,7 @@ export function LiveResultsChart({
     {},
   );
   const [jumpUntil, setJumpUntil] = useState<Record<number, number>>({});
+  const [winnerActive, setWinnerActive] = useState(false);
 
   const logLastVotes = useMemo(() => lastVoteTimesFromLog(votes), [votes]);
 
@@ -118,10 +124,34 @@ export function LiveResultsChart({
     return () => window.clearTimeout(frame);
   }, [bumpedOptionId]);
 
+  // Trigger / reset winner celebration with close & next question
+  useEffect(() => {
+    if (isClosed && totalVotes > 0) {
+      const t = window.setTimeout(() => setWinnerActive(true), 0);
+      return () => window.clearTimeout(t);
+    }
+    const t = window.setTimeout(() => setWinnerActive(false), 0);
+    return () => window.clearTimeout(t);
+  }, [isClosed, totalVotes, questionNumber]);
+
   const ranks = useMemo(
     () => computeRanks(options, counts, totalVotes),
     [options, counts, totalVotes],
   );
+
+  const winnerId = useMemo(() => {
+    if (totalVotes <= 0) return null;
+    let bestId: number | null = null;
+    let bestVotes = -1;
+    for (const option of options) {
+      const v = counts[option.id] ?? 0;
+      if (v > bestVotes) {
+        bestVotes = v;
+        bestId = option.id;
+      }
+    }
+    return bestId;
+  }, [options, counts, totalVotes]);
 
   const labelClass = transparent
     ? "text-white drop-shadow"
@@ -129,11 +159,19 @@ export function LiveResultsChart({
   const metaClass = transparent
     ? "text-white/90 drop-shadow"
     : visuals.chart.meta;
-  const trackClass = transparent ? "bg-white/15" : visuals.chart.track;
+  const trackClass = transparent ? "bg-white/20" : visuals.chart.track;
   const emptyClass = transparent ? "text-white/70" : visuals.chart.empty;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="relative flex flex-col gap-4">
+      <WinnerCelebration
+        open={winnerActive}
+        options={options}
+        counts={counts}
+        theme={theme}
+        showAvatar={useAvatars}
+      />
+
       {options.map((option, index) => {
         const optionVotes = counts[option.id] ?? 0;
         const sharePct =
@@ -155,17 +193,24 @@ export function LiveResultsChart({
               ? now - clockOrigin
               : 0;
         const isSleeping =
+          !winnerActive &&
           now > 0 &&
           (rank === "lowest" || optionVotes === 0) &&
           idleMs >= SLEEP_IDLE_MS &&
           rank !== "first";
-        const isJumping = (jumpUntil[option.id] ?? 0) > now;
-        const isChasing = rank === "second" && !isSleeping && !isJumping;
+        const isJumping =
+          !winnerActive && (jumpUntil[option.id] ?? 0) > now;
+        const isChasing =
+          !winnerActive && rank === "second" && !isSleeping && !isJumping;
+        const isWinnerBar =
+          winnerActive && !useAvatars && option.id === winnerId;
 
         let badge: string | null = null;
-        if (isSleeping) badge = "💤 zZz...";
-        else if (rank === "first" && totalVotes > 0) badge = "👑 Leading!";
-        else if (rank === "second") badge = "🔥 Come on!!";
+        if (!winnerActive) {
+          if (isSleeping) badge = "💤 zZz...";
+          else if (rank === "first" && totalVotes > 0) badge = "👑 Leading!";
+          else if (rank === "second") badge = "🔥 Come on!!";
+        }
 
         let mascotAnim = "";
         if (isJumping) mascotAnim = "mascot-jump";
@@ -187,11 +232,13 @@ export function LiveResultsChart({
               className={`relative overflow-visible rounded-full ${barHeight} ${trackClass}`}
             >
               <div
-                className={`absolute inset-y-0 left-0 rounded-full transition-[width] duration-500 ease-out ${barColor}`}
+                className={`absolute inset-y-0 left-0 rounded-full transition-[width] duration-500 ease-out ${
+                  isWinnerBar ? "winner-bar-pulse" : barColor
+                }`}
                 style={{ width: `${widthPercent}%` }}
               />
 
-              {useAvatars && icon && (
+              {useAvatars && icon && !winnerActive && (
                 <div
                   className="absolute top-1/2 z-10 -translate-y-1/2 transition-[left] duration-500 ease-out"
                   style={{
@@ -206,7 +253,7 @@ export function LiveResultsChart({
                           initial={{ opacity: 0, y: 4, scale: 0.85 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
-                          className="mascot-badge absolute -top-5 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-slate-950/90 px-2 py-0.5 text-[10px] font-bold leading-none text-white shadow-lg ring-1 ring-white/20"
+                          className="mascot-badge absolute -top-5 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-950/85 px-2 py-0.5 text-[10px] font-bold leading-none text-lime-50 shadow-lg ring-1 ring-white/25"
                         >
                           {badge}
                         </motion.span>
@@ -227,7 +274,7 @@ export function LiveResultsChart({
       })}
 
       <AnimatePresence>
-        {totalVotes === 0 && (
+        {totalVotes === 0 && !winnerActive && (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

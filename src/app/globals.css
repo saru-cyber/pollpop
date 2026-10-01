@@ -103,3 +103,21 @@ input[type="radio"] {
 .mascot-badge {
   animation: badge-pop 0.35s ease-out both;
 }
+
+/* Winner bar glow (no-avatar themes) */
+@keyframes winner-bar-pulse {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.35);
+  }
+  50% {
+    filter: brightness(1.25) saturate(1.35);
+    box-shadow: 0 0 18px 4px rgba(244, 114, 182, 0.55);
+  }
+}
+
+.winner-bar-pulse {
+  animation: winner-bar-pulse 0.85s ease-in-out infinite;
+  background-image: linear-gradient(90deg, #fbbf24, #f472b6, #facc15) !important;
+}

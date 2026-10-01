@@ -192,15 +192,25 @@ export default function AdminPage() {
         <h2 className="mb-5 font-[family-name:var(--font-display)] text-lg font-bold text-slate-100">
           📊 Live Results
         </h2>
-        <LiveResultsChart
-          options={poll.options}
-          counts={counts}
-          totalVotes={totalVotes}
-          theme={poll.theme}
-          votesPerVoter={poll.max_votes_per_user}
-          votes={votes}
-          bumpedOptionId={lastBumpedOptionId}
-        />
+        <div
+          className={
+            poll.theme === "animal_race"
+              ? "rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-[#f3faee] via-[#f8f4e8] to-[#e8f5e0] p-5"
+              : undefined
+          }
+        >
+          <LiveResultsChart
+            options={poll.options}
+            counts={counts}
+            totalVotes={totalVotes}
+            theme={poll.theme}
+            votesPerVoter={poll.max_votes_per_user}
+            votes={votes}
+            bumpedOptionId={lastBumpedOptionId}
+            isClosed={poll.is_closed}
+            questionNumber={poll.question_number}
+          />
+        </div>
       </section>
 
       <div className="mt-12">
