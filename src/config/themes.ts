@@ -50,6 +50,15 @@ export type ThemeConfig = {
   showAvatars: boolean;
   optionIcons?: readonly string[];
   barColors: string[];
+  /**
+   * Progress bar thickness per surface (Tailwind height classes).
+   * Avatar themes stay moderate; icon-less themes use thicker bars on admin/projection.
+   */
+  barHeight: {
+    default: string;
+    admin: string;
+    projection: string;
+  };
   /** Chart palette for light / OBS panels */
   chart: ChartTone;
   admin: {
@@ -200,6 +209,11 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       "bg-neutral-300",
       "bg-stone-300",
     ],
+    barHeight: {
+      default: "h-4",
+      admin: "h-14",
+      projection: "h-16",
+    },
     chart: {
       label: "text-slate-100",
       meta: "text-slate-500",
@@ -305,6 +319,11 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       "bg-rose-500",
       "bg-violet-500",
     ],
+    barHeight: {
+      default: "h-4",
+      admin: "h-14",
+      projection: "h-16",
+    },
     chart: {
       label: "text-slate-800",
       meta: "text-slate-500",
@@ -410,6 +429,11 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       "bg-yellow-300",
       "bg-red-500",
     ],
+    barHeight: {
+      default: "h-4",
+      admin: "h-14",
+      projection: "h-16",
+    },
     chart: {
       label: "text-lime-100",
       meta: "text-fuchsia-200/80",
@@ -523,6 +547,11 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       "bg-yellow-400",
       "bg-violet-400",
     ],
+    barHeight: {
+      default: "h-4",
+      admin: "h-14",
+      projection: "h-16",
+    },
     chart: {
       label: "text-fuchsia-900",
       meta: "text-rose-600",
@@ -632,6 +661,11 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       "bg-orange-300",
       "bg-teal-300",
     ],
+    barHeight: {
+      default: "h-10",
+      admin: "h-12",
+      projection: "h-10",
+    },
     chart: {
       label: "text-emerald-950",
       meta: "text-lime-800/80",

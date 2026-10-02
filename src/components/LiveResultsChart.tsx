@@ -107,17 +107,12 @@ export function LiveResultsChart({
   const voterScale = votesPerVoter > 0 ? votesPerVoter * 2 : 0;
   const maxScale = Math.max(voterScale, maxVotesInPoll * 1.2, 1);
 
-  const barHeight = isProjection
-    ? useAvatars
-      ? "h-10"
-      : "h-5"
-    : compactAdmin
-      ? useAvatars
-        ? "h-12"
-        : "h-4"
-      : useAvatars
-        ? "h-10"
-        : "h-3";
+  const barHeight =
+    surface === "projection"
+      ? themeConfig.barHeight.projection
+      : surface === "admin"
+        ? themeConfig.barHeight.admin
+        : themeConfig.barHeight.default;
   const iconSize = isProjection
     ? "text-3xl"
     : compactAdmin
@@ -126,7 +121,9 @@ export function LiveResultsChart({
   const rowGap = isProjection
     ? "gap-2"
     : compactAdmin
-      ? "gap-2"
+      ? useAvatars
+        ? "gap-2"
+        : "gap-3"
       : useAvatars
         ? "gap-6"
         : "gap-4";
