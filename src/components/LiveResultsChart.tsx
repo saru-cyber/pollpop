@@ -109,8 +109,8 @@ export function LiveResultsChart({
 
   const barHeight = isProjection
     ? useAvatars
-      ? "h-14 sm:h-16"
-      : "h-6 sm:h-8"
+      ? "h-10"
+      : "h-5"
     : compactAdmin
       ? useAvatars
         ? "h-7"
@@ -119,25 +119,21 @@ export function LiveResultsChart({
         ? "h-10"
         : "h-3";
   const iconSize = isProjection
-    ? "text-4xl sm:text-5xl"
+    ? "text-3xl"
     : compactAdmin
       ? "text-xl"
       : "text-2xl";
   const rowGap = isProjection
-    ? useAvatars
-      ? "gap-5 sm:gap-7"
-      : "gap-4 sm:gap-5"
+    ? "gap-2"
     : compactAdmin
       ? "gap-1.5"
       : useAvatars
         ? "gap-6"
         : "gap-4";
+  /** Above-bar badge needs top pad; admin/projection put badge beside mascot */
   const labelPad =
-    useAvatars && !compactAdmin
-      ? isProjection
-        ? "pt-8"
-        : "pt-6"
-      : undefined;
+    useAvatars && !compactAdmin && !isProjection ? "pt-6" : undefined;
+  const badgeBeside = compactAdmin || isProjection;
 
   const [now, setNow] = useState(0);
   const [clockOrigin, setClockOrigin] = useState(0);
@@ -204,12 +200,8 @@ export function LiveResultsChart({
 
   return (
     <div
-      className={`relative flex h-full min-h-0 flex-col ${
-        compactAdmin
-          ? "justify-evenly overflow-hidden"
-          : isProjection
-            ? "justify-evenly overflow-hidden"
-            : ""
+      className={`relative flex h-full min-h-0 flex-col overflow-hidden ${
+        compactAdmin || isProjection ? "justify-evenly" : ""
       } ${rowGap}`}
     >
       <WinnerCelebration
@@ -271,16 +263,23 @@ export function LiveResultsChart({
         else if (isChasing) mascotAnim = "mascot-chase";
 
         return (
-          <div key={option.id} className="relative shrink-0">
+          <div
+            key={option.id}
+            className={
+              isProjection
+                ? "relative flex min-h-0 flex-1 flex-col justify-center"
+                : "relative shrink-0"
+            }
+          >
             <div
               className={`flex items-baseline justify-between gap-2 ${
-                compactAdmin ? "mb-0.5" : isProjection ? "mb-2" : "mb-1.5"
+                compactAdmin || isProjection ? "mb-0.5" : "mb-1.5"
               }`}
             >
               <span
                 className={`relative z-10 min-w-0 truncate font-black tracking-tight ${
                   isProjection
-                    ? "text-xl sm:text-3xl"
+                    ? "text-base sm:text-xl lg:text-2xl"
                     : compactAdmin
                       ? "text-xs font-bold"
                       : "text-sm font-bold"
@@ -291,7 +290,7 @@ export function LiveResultsChart({
               <span
                 className={`relative z-10 shrink-0 font-bold tabular-nums ${
                   isProjection
-                    ? "text-lg sm:text-2xl"
+                    ? "text-sm sm:text-lg lg:text-xl"
                     : compactAdmin
                       ? "text-[10px] font-medium"
                       : "text-xs font-medium"
@@ -328,7 +327,7 @@ export function LiveResultsChart({
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
                             className={`mascot-badge absolute z-20 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none ${badgeClass} ${
-                              compactAdmin
+                              badgeBeside
                                 ? "left-full top-1/2 ml-1 -translate-y-1/2"
                                 : "bottom-full left-1/2 mb-1 -translate-x-1/2"
                             }`}

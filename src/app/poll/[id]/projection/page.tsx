@@ -109,19 +109,19 @@ function ProjectionView() {
       data-projection-mode={mode}
       data-theme={theme.id}
     >
-      <div className="mx-auto flex h-full w-full max-w-6xl flex-col px-6 py-5 sm:px-10 sm:py-6 lg:px-14">
-        <header className="flex shrink-0 flex-wrap items-start justify-between gap-4">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col overflow-hidden px-5 py-3 sm:px-8 sm:py-4 lg:px-12">
+        <header className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 py-1">
           <div className="min-w-0 flex-1">
-            <p className={`text-xs sm:text-sm ${projection.eyebrow}`}>
+            <p className={`text-[10px] leading-none sm:text-xs ${projection.eyebrow}`}>
               POLLPOP · {theme.shortName} · PROJECTION
             </p>
             <h1
-              className={`mt-2 font-[family-name:var(--font-display)] text-3xl leading-tight sm:text-5xl lg:text-6xl ${projection.title}`}
+              className={`mt-1 font-[family-name:var(--font-display)] text-2xl leading-tight sm:text-3xl lg:text-4xl ${projection.title}`}
             >
               {poll.title}
             </h1>
             <p
-              className={`mt-2 text-lg font-semibold sm:text-xl ${projection.meta}`}
+              className={`mt-0.5 text-sm font-semibold sm:text-base ${projection.meta}`}
             >
               {totalVotes} votes
               {poll.is_closed ? " · CLOSED" : " · LIVE"}
@@ -129,16 +129,16 @@ function ProjectionView() {
             </p>
           </div>
 
-          <div className="flex flex-col items-end gap-3">
+          <div className="flex shrink-0 flex-col items-end gap-1">
             <div
-              className="flex rounded-full p-1 ring-1 ring-current/20"
+              className="flex rounded-full p-0.5 ring-1 ring-current/20"
               role="group"
               aria-label="Venue lighting mode"
             >
               <button
                 type="button"
                 onClick={() => setVenueMode("dark")}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition sm:px-4 sm:text-sm ${
+                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs ${
                   mode === "dark"
                     ? projection.toggleActive
                     : projection.toggleIdle
@@ -149,7 +149,7 @@ function ProjectionView() {
               <button
                 type="button"
                 onClick={() => setVenueMode("light")}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition sm:px-4 sm:text-sm ${
+                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs ${
                   mode === "light"
                     ? projection.toggleActive
                     : projection.toggleIdle
@@ -158,14 +158,14 @@ function ProjectionView() {
                 ☀️ Light Venue
               </button>
             </div>
-            <p className={`text-[10px] sm:text-xs ${projection.meta}`}>
+            <p className={`text-[10px] ${projection.meta}`}>
               Tip: press F11 for fullscreen
             </p>
           </div>
         </header>
 
-        <div className="mt-4 grid min-h-0 flex-1 gap-6 overflow-hidden lg:grid-cols-[1fr_auto] lg:items-stretch">
-          <section className="relative min-h-0 flex-1 overflow-hidden">
+        <div className="mt-2 flex min-h-0 flex-1 flex-col gap-4 overflow-hidden lg:mt-3 lg:flex-row lg:items-center lg:gap-8">
+          <section className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
             <LiveResultsChart
               options={poll.options}
               counts={counts}
@@ -181,7 +181,7 @@ function ProjectionView() {
             />
           </section>
 
-          <aside className="flex shrink-0 flex-col items-center justify-center gap-3 lg:justify-start lg:pt-2">
+          <aside className="flex shrink-0 flex-col items-center justify-center gap-2 lg:self-center">
             <div className={projection.qrFrame}>
               {voteUrl ? (
                 <QRCodeSVG value={voteUrl} size={220} level="M" />
@@ -190,7 +190,7 @@ function ProjectionView() {
               )}
             </div>
             <p
-              className={`max-w-[14rem] text-center text-sm font-bold sm:text-base ${projection.meta} ${projection.textShadow}`}
+              className={`max-w-[14rem] text-center text-sm font-bold ${projection.meta} ${projection.textShadow}`}
             >
               Scan to vote
             </p>
