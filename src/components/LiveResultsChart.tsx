@@ -113,8 +113,8 @@ export function LiveResultsChart({
       : "h-5"
     : compactAdmin
       ? useAvatars
-        ? "h-7"
-        : "h-2.5"
+        ? "h-8"
+        : "h-3"
       : useAvatars
         ? "h-10"
         : "h-3";
@@ -126,7 +126,7 @@ export function LiveResultsChart({
   const rowGap = isProjection
     ? "gap-2"
     : compactAdmin
-      ? "gap-1.5"
+      ? "gap-3"
       : useAvatars
         ? "gap-6"
         : "gap-4";
@@ -200,8 +200,12 @@ export function LiveResultsChart({
 
   return (
     <div
-      className={`relative flex h-full min-h-0 flex-col overflow-hidden ${
-        compactAdmin || isProjection ? "justify-evenly" : ""
+      className={`relative flex min-h-0 flex-col overflow-hidden ${
+        isProjection
+          ? "h-full justify-evenly"
+          : compactAdmin
+            ? "h-full justify-center"
+            : ""
       } ${rowGap}`}
     >
       <WinnerCelebration

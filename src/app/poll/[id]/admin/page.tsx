@@ -287,7 +287,7 @@ export default function AdminPage() {
               >
                 📊 Live Results
               </h2>
-              <div className="min-h-0 flex-1 overflow-hidden">
+              <div className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden py-1">
                 <LiveResultsChart
                   options={poll.options}
                   counts={counts}
@@ -303,7 +303,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="shrink-0">
+            <div className="shrink-0 pt-0.5">
               <button
                 type="button"
                 disabled={busy !== null}
