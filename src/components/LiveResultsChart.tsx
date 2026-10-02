@@ -113,20 +113,20 @@ export function LiveResultsChart({
       : "h-5"
     : compactAdmin
       ? useAvatars
-        ? "h-8"
-        : "h-3"
+        ? "h-12"
+        : "h-4"
       : useAvatars
         ? "h-10"
         : "h-3";
   const iconSize = isProjection
     ? "text-3xl"
     : compactAdmin
-      ? "text-xl"
+      ? "text-3xl sm:text-4xl"
       : "text-2xl";
   const rowGap = isProjection
     ? "gap-2"
     : compactAdmin
-      ? "gap-3"
+      ? "gap-2"
       : useAvatars
         ? "gap-6"
         : "gap-4";
@@ -134,6 +134,7 @@ export function LiveResultsChart({
   const labelPad =
     useAvatars && !compactAdmin && !isProjection ? "pt-6" : undefined;
   const badgeBeside = compactAdmin || isProjection;
+  const distributeRows = compactAdmin || isProjection;
 
   const [now, setNow] = useState(0);
   const [clockOrigin, setClockOrigin] = useState(0);
@@ -201,11 +202,7 @@ export function LiveResultsChart({
   return (
     <div
       className={`relative flex min-h-0 flex-col overflow-hidden ${
-        isProjection
-          ? "h-full justify-evenly"
-          : compactAdmin
-            ? "h-full justify-center"
-            : ""
+        distributeRows ? "h-full justify-between" : ""
       } ${rowGap}`}
     >
       <WinnerCelebration
@@ -270,14 +267,14 @@ export function LiveResultsChart({
           <div
             key={option.id}
             className={
-              isProjection
+              distributeRows
                 ? "relative flex min-h-0 flex-1 flex-col justify-center"
                 : "relative shrink-0"
             }
           >
             <div
               className={`flex items-baseline justify-between gap-2 ${
-                compactAdmin || isProjection ? "mb-0.5" : "mb-1.5"
+                compactAdmin || isProjection ? "mb-1" : "mb-1.5"
               }`}
             >
               <span
@@ -285,7 +282,7 @@ export function LiveResultsChart({
                   isProjection
                     ? "text-base sm:text-xl lg:text-2xl"
                     : compactAdmin
-                      ? "text-xs font-bold"
+                      ? "text-base font-bold sm:text-lg"
                       : "text-sm font-bold"
                 } ${labelClass} ${isProjection ? projection.textShadow : ""}`}
               >
@@ -296,7 +293,7 @@ export function LiveResultsChart({
                   isProjection
                     ? "text-sm sm:text-lg lg:text-xl"
                     : compactAdmin
-                      ? "text-[10px] font-medium"
+                      ? "text-sm sm:text-base"
                       : "text-xs font-medium"
                 } ${metaClass} ${isProjection ? projection.textShadow : ""}`}
               >
@@ -319,7 +316,7 @@ export function LiveResultsChart({
                   <div
                     className="absolute top-1/2 z-10 -translate-y-1/2 transition-[left] duration-500 ease-out"
                     style={{
-                      left: `calc(${displayWidth}% - 1rem)`,
+                      left: `calc(${displayWidth}% - ${compactAdmin ? "1.25rem" : "1rem"})`,
                     }}
                   >
                     <div className="relative">
@@ -330,9 +327,13 @@ export function LiveResultsChart({
                             initial={{ opacity: 0, y: 4, scale: 0.85 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className={`mascot-badge absolute z-20 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none ${badgeClass} ${
+                            className={`mascot-badge absolute z-20 whitespace-nowrap rounded-full font-bold leading-none ${badgeClass} ${
+                              compactAdmin
+                                ? "px-2 py-1 text-[11px] sm:text-xs"
+                                : "px-1.5 py-0.5 text-[9px]"
+                            } ${
                               badgeBeside
-                                ? "left-full top-1/2 ml-1 -translate-y-1/2"
+                                ? "left-full top-1/2 ml-1.5 -translate-y-1/2"
                                 : "bottom-full left-1/2 mb-1 -translate-x-1/2"
                             }`}
                           >
