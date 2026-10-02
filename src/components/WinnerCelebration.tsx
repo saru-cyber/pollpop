@@ -12,6 +12,8 @@ type WinnerCelebrationProps = {
   counts: VoteCounts;
   theme: PollTheme | string;
   showAvatar: boolean;
+  /** Projector / venue scale */
+  size?: "default" | "projection";
 };
 
 function playWinnerPop() {
@@ -49,20 +51,22 @@ export function WinnerCelebration({
   counts,
   theme,
   showAvatar,
+  size = "default",
 }: WinnerCelebrationProps) {
   const themeConfig = getTheme(theme);
   const vfx = themeConfig.vfx;
+  const isProjection = size === "projection";
 
   const confetti = useMemo(
     () =>
-      Array.from({ length: 28 }, (_, i) => ({
+      Array.from({ length: isProjection ? 48 : 28 }, (_, i) => ({
         id: i,
         emoji: vfx.confetti[i % vfx.confetti.length],
         x: ((i * 37) % 100) - 50,
         delay: (i % 8) * 0.05,
         duration: 1.4 + (i % 5) * 0.15,
       })),
-    [vfx.confetti],
+    [vfx.confetti, isProjection],
   );
 
   const result = useMemo(
@@ -75,15 +79,22 @@ export function WinnerCelebration({
     playWinnerPop();
   }, [open, result, vfx.playWinnerSe]);
 
-  const headlineSize =
-    result?.kind === "draw"
+  const headlineSize = isProjection
+    ? result?.kind === "draw"
+      ? "text-3xl sm:text-5xl"
+      : "text-4xl sm:text-6xl"
+    : result?.kind === "draw"
       ? "text-lg sm:text-2xl"
       : "text-2xl sm:text-3xl";
 
   const multi = (result?.topOptions.length ?? 0) > 1;
-  const iconSize = multi
-    ? "text-4xl sm:text-5xl"
-    : "text-7xl sm:text-8xl";
+  const iconSize = isProjection
+    ? multi
+      ? "text-6xl sm:text-7xl"
+      : "text-8xl sm:text-9xl"
+    : multi
+      ? "text-4xl sm:text-5xl"
+      : "text-7xl sm:text-8xl";
 
   return (
     <AnimatePresence>
@@ -100,9 +111,15 @@ export function WinnerCelebration({
             animate={{ y: 0, scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 320, damping: 16 }}
           >
-            <div className={`${vfx.winnerBanner} max-w-[min(92vw,28rem)]`}>
+            <div
+              className={`${vfx.winnerBanner} max-w-[min(94vw,40rem)] ${
+                isProjection ? "px-8 py-4 sm:px-10 sm:py-5" : ""
+              }`}
+            >
               <p
-                className={`font-[family-name:var(--font-display)] text-sm font-black tracking-[0.2em] sm:text-base ${vfx.winnerTitle}`}
+                className={`font-[family-name:var(--font-display)] font-black tracking-[0.2em] ${
+                  isProjection ? "text-base sm:text-xl" : "text-sm sm:text-base"
+                } ${vfx.winnerTitle}`}
               >
                 {result.subline}
               </p>

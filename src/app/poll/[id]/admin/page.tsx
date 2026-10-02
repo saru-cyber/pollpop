@@ -72,6 +72,10 @@ export default function AdminPage() {
     () => (baseUrl ? `${baseUrl}/poll/${pollId}/obs` : ""),
     [baseUrl, pollId],
   );
+  const projectionUrl = useMemo(
+    () => (baseUrl ? `${baseUrl}/poll/${pollId}/projection` : ""),
+    [baseUrl, pollId],
+  );
 
   /** Stage 1: close voting, stay on page so winner FX can play on admin + OBS */
   async function runFinishVoting() {
@@ -264,6 +268,11 @@ export default function AdminPage() {
                 label="🎥 Copy OBS Link"
                 value={obsUrl}
                 className={`w-full px-2 py-1.5 text-[11px] sm:text-xs lg:px-3 lg:py-2 ${admin.obsBtn}`}
+              />
+              <CopyButton
+                label="🎥 Copy Projection Link"
+                value={projectionUrl}
+                className={`w-full px-2 py-1.5 text-[11px] sm:text-xs lg:px-3 lg:py-2 ${admin.projectionBtn}`}
               />
             </div>
           </aside>

@@ -21,8 +21,10 @@ type LiveResultsChartProps = {
   showAnimals?: boolean;
   bumpedOptionId?: number | null;
   transparent?: boolean;
-  /** Use admin chart palette (dark forest for Animal Race, etc.) */
-  surface?: "default" | "admin";
+  /** Use admin chart palette, or projection venue scale */
+  surface?: "default" | "admin" | "projection";
+  /** Required when surface is projection */
+  projectionMode?: "dark" | "light";
   isClosed?: boolean;
   questionNumber?: number;
 };
@@ -81,16 +83,23 @@ export function LiveResultsChart({
   bumpedOptionId = null,
   transparent = false,
   surface = "default",
+  projectionMode = "dark",
   isClosed = false,
   questionNumber = 1,
 }: LiveResultsChartProps) {
   const themeConfig = getTheme(theme);
+  const projection = themeConfig.projection[projectionMode];
   const chartTone =
-    surface === "admin" && !transparent
-      ? themeConfig.admin.chart
-      : themeConfig.chart;
+    surface === "projection"
+      ? projection.chart
+      : surface === "admin" && !transparent
+        ? themeConfig.admin.chart
+        : themeConfig.chart;
+  const activeBarColors =
+    surface === "projection" ? projection.barColors : themeConfig.barColors;
   const useAvatars = showAnimals ?? themeConfig.showAvatars;
   const compactAdmin = surface === "admin";
+  const isProjection = surface === "projection";
   const maxVotesInPoll = Math.max(
     0,
     ...options.map((o) => counts[o.id] ?? 0),
@@ -98,21 +107,37 @@ export function LiveResultsChart({
   const voterScale = votesPerVoter > 0 ? votesPerVoter * 2 : 0;
   const maxScale = Math.max(voterScale, maxVotesInPoll * 1.2, 1);
 
-  const barHeight = compactAdmin
+  const barHeight = isProjection
     ? useAvatars
-      ? "h-7"
-      : "h-2.5"
-    : useAvatars
-      ? "h-10"
-      : "h-3";
-  const iconSize = compactAdmin ? "text-xl" : "text-2xl";
-  const rowGap = compactAdmin
-    ? "gap-1.5"
-    : useAvatars
-      ? "gap-6"
-      : "gap-4";
-  /** Admin: badge beside mascot (no tall top pad). Default/OBS: above. */
-  const labelPad = useAvatars && !compactAdmin ? "pt-6" : undefined;
+      ? "h-14 sm:h-16"
+      : "h-6 sm:h-8"
+    : compactAdmin
+      ? useAvatars
+        ? "h-7"
+        : "h-2.5"
+      : useAvatars
+        ? "h-10"
+        : "h-3";
+  const iconSize = isProjection
+    ? "text-4xl sm:text-5xl"
+    : compactAdmin
+      ? "text-xl"
+      : "text-2xl";
+  const rowGap = isProjection
+    ? useAvatars
+      ? "gap-5 sm:gap-7"
+      : "gap-4 sm:gap-5"
+    : compactAdmin
+      ? "gap-1.5"
+      : useAvatars
+        ? "gap-6"
+        : "gap-4";
+  const labelPad =
+    useAvatars && !compactAdmin
+      ? isProjection
+        ? "pt-8"
+        : "pt-6"
+      : undefined;
 
   const [now, setNow] = useState(0);
   const [clockOrigin, setClockOrigin] = useState(0);
@@ -180,7 +205,11 @@ export function LiveResultsChart({
   return (
     <div
       className={`relative flex h-full min-h-0 flex-col ${
-        compactAdmin ? "justify-evenly overflow-hidden" : ""
+        compactAdmin
+          ? "justify-evenly overflow-hidden"
+          : isProjection
+            ? "justify-evenly overflow-hidden"
+            : ""
       } ${rowGap}`}
     >
       <WinnerCelebration
@@ -189,6 +218,7 @@ export function LiveResultsChart({
         counts={counts}
         theme={theme}
         showAvatar={useAvatars}
+        size={isProjection ? "projection" : "default"}
       />
 
       {options.map((option, index) => {
@@ -198,7 +228,7 @@ export function LiveResultsChart({
         const widthPercent = (optionVotes / maxScale) * 100;
         const icon = useAvatars ? getOptionIcon(theme, index) : null;
         const barColor =
-          themeConfig.barColors[index % themeConfig.barColors.length];
+          activeBarColors[index % activeBarColors.length];
 
         const rank = ranks[option.id] ?? null;
         const lastAt = Math.max(
@@ -244,20 +274,28 @@ export function LiveResultsChart({
           <div key={option.id} className="relative shrink-0">
             <div
               className={`flex items-baseline justify-between gap-2 ${
-                compactAdmin ? "mb-0.5" : "mb-1.5"
+                compactAdmin ? "mb-0.5" : isProjection ? "mb-2" : "mb-1.5"
               }`}
             >
               <span
-                className={`relative z-10 min-w-0 truncate font-bold tracking-tight ${
-                  compactAdmin ? "text-xs" : "text-sm"
-                } ${labelClass}`}
+                className={`relative z-10 min-w-0 truncate font-black tracking-tight ${
+                  isProjection
+                    ? "text-xl sm:text-3xl"
+                    : compactAdmin
+                      ? "text-xs font-bold"
+                      : "text-sm font-bold"
+                } ${labelClass} ${isProjection ? projection.textShadow : ""}`}
               >
                 {option.text}
               </span>
               <span
-                className={`relative z-10 shrink-0 font-medium tabular-nums ${
-                  compactAdmin ? "text-[10px]" : "text-xs"
-                } ${metaClass}`}
+                className={`relative z-10 shrink-0 font-bold tabular-nums ${
+                  isProjection
+                    ? "text-lg sm:text-2xl"
+                    : compactAdmin
+                      ? "text-[10px] font-medium"
+                      : "text-xs font-medium"
+                } ${metaClass} ${isProjection ? projection.textShadow : ""}`}
               >
                 {optionVotes} ({sharePct.toFixed(0)}%)
               </span>

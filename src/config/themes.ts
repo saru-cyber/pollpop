@@ -7,8 +7,38 @@ export type ChartTone = {
   empty: string;
 };
 
+/** Venue lighting for projector / big-screen view */
+export type ProjectionVenueMode = "dark" | "light";
+
 /**
- * Single source of truth for every theme surface (create / vote / admin / OBS / VFX).
+ * Styles for /poll/[id]/projection.
+ * Future event themes (halloween, christmas, …) should customize both modes
+ * so worldbuilding (palette, decor, FX) lands on the big screen in one place.
+ */
+export type ProjectionModeStyles = {
+  bg: string;
+  eyebrow: string;
+  title: string;
+  meta: string;
+  badge: string;
+  chart: ChartTone;
+  barColors: string[];
+  /** Strong readability on washed-out projectors */
+  textShadow: string;
+  qrFrame: string;
+  toggleIdle: string;
+  toggleActive: string;
+  /** Optional event décor classes (snow, ghosts, …) */
+  decor?: string;
+};
+
+export type ProjectionConfig = {
+  dark: ProjectionModeStyles;
+  light: ProjectionModeStyles;
+};
+
+/**
+ * Single source of truth for every theme surface (create / vote / admin / OBS / projection / VFX).
  * Screens should only read from THEMES[id] — never hardcode theme colors.
  */
 export type ThemeConfig = {
@@ -39,6 +69,8 @@ export type ThemeConfig = {
     finishBtn: string;
     shareBtn: string;
     obsBtn: string;
+    /** Projector / venue big-screen link */
+    projectionBtn: string;
     /** Stage 1: close voting & reveal winner (flag / entertainment, not stop-red) */
     finishVotingBtn: string;
     /** Stage 2: go to next question compose */
@@ -56,6 +88,8 @@ export type ThemeConfig = {
     title: string;
     badge: string;
   };
+  /** Offline venue projector view (Dark / Light lighting modes) */
+  projection: ProjectionConfig;
   vote: {
     bg: string;
     brand: string;
@@ -91,6 +125,62 @@ export type ThemeConfig = {
     playWinnerSe: boolean;
   };
 };
+
+/** Shared venue lighting bases — themes override barColors / accents */
+function projectionPair(
+  barColors: string[],
+  overrides?: Partial<{
+    dark: Partial<ProjectionModeStyles>;
+    light: Partial<ProjectionModeStyles>;
+  }>,
+): ProjectionConfig {
+  const darkBase: ProjectionModeStyles = {
+    bg: "min-h-screen bg-black text-white",
+    eyebrow:
+      "text-white/80 font-black tracking-[0.3em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]",
+    title:
+      "text-white font-black drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]",
+    meta: "text-white/85 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]",
+    badge:
+      "bg-white/15 text-white ring-1 ring-white/40 backdrop-blur drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]",
+    chart: {
+      label:
+        "text-white font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]",
+      meta: "text-white/90 font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]",
+      track: "bg-white/15 ring-1 ring-white/20",
+      empty: "text-white/60",
+    },
+    barColors,
+    textShadow: "drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]",
+    qrFrame: "rounded-2xl bg-white p-4 shadow-[0_0_40px_rgba(255,255,255,0.15)]",
+    toggleIdle: "bg-white/10 text-white/70 hover:bg-white/20",
+    toggleActive: "bg-white text-black font-bold",
+  };
+  const lightBase: ProjectionModeStyles = {
+    bg: "min-h-screen bg-white text-black",
+    eyebrow:
+      "text-black/70 font-black tracking-[0.3em] drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]",
+    title:
+      "text-black font-black drop-shadow-[0_1px_0_rgba(255,255,255,0.9)]",
+    meta: "text-black/75 font-semibold",
+    badge: "bg-black/90 text-white ring-1 ring-black/20",
+    chart: {
+      label: "text-black font-black",
+      meta: "text-black/80 font-bold",
+      track: "bg-black/10 ring-1 ring-black/15",
+      empty: "text-black/45",
+    },
+    barColors,
+    textShadow: "drop-shadow-[0_1px_0_rgba(255,255,255,0.85)]",
+    qrFrame: "rounded-2xl bg-white p-4 ring-2 ring-black/15 shadow-xl",
+    toggleIdle: "bg-black/5 text-black/60 hover:bg-black/10",
+    toggleActive: "bg-black text-white font-bold",
+  };
+  return {
+    dark: { ...darkBase, ...overrides?.dark, barColors: overrides?.dark?.barColors ?? barColors, chart: { ...darkBase.chart, ...overrides?.dark?.chart } },
+    light: { ...lightBase, ...overrides?.light, barColors: overrides?.light?.barColors ?? barColors, chart: { ...lightBase.chart, ...overrides?.light?.chart } },
+  };
+}
 
 const DEFAULT_CONFETTI = ["✨", "💖", "🎉", "🌸", "⭐", "🍃"] as const;
 const ANIMAL_CONFETTI = ["✨", "🍃", "🌼", "⭐", "🦊", "🍀"] as const;
@@ -131,6 +221,7 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
         "border-slate-600/70 text-slate-400 hover:border-rose-400/40 hover:text-rose-200",
       shareBtn: "bg-cyan-500 hover:bg-cyan-400 text-slate-950",
       obsBtn: "bg-orange-400 hover:bg-orange-300 text-slate-950",
+      projectionBtn: "bg-violet-500 hover:bg-violet-400 text-white",
       finishVotingBtn:
         "bg-gradient-to-r from-amber-300 via-yellow-300 to-lime-300 text-slate-950 shadow-amber-900/30",
       nextQuestionBtn:
@@ -151,6 +242,13 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       title: "text-white",
       badge: "bg-black/50 text-white",
     },
+    projection: projectionPair([
+      "bg-slate-100",
+      "bg-zinc-200",
+      "bg-neutral-200",
+      "bg-stone-200",
+      "bg-slate-300",
+    ]),
     vote: {
       bg: "bg-[#0a0a0a]",
       brand: "text-slate-500",
@@ -228,6 +326,7 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
         "border-slate-300 text-slate-500 hover:border-rose-300 hover:text-rose-500",
       shareBtn: "bg-sky-500 hover:bg-sky-400 text-white",
       obsBtn: "bg-orange-400 hover:bg-orange-300 text-slate-950",
+      projectionBtn: "bg-indigo-500 hover:bg-indigo-400 text-white",
       finishVotingBtn:
         "bg-gradient-to-r from-amber-400 via-yellow-400 to-lime-400 text-slate-900 shadow-amber-200/50",
       nextQuestionBtn:
@@ -248,6 +347,13 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       title: "text-slate-900 drop-shadow-none",
       badge: "bg-white/85 text-slate-800",
     },
+    projection: projectionPair([
+      "bg-sky-600",
+      "bg-emerald-600",
+      "bg-amber-500",
+      "bg-rose-600",
+      "bg-violet-600",
+    ]),
     vote: {
       bg: "bg-[#f4f7fb] text-slate-900",
       brand: "text-sky-600",
@@ -325,6 +431,7 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
         "border-fuchsia-500/40 text-fuchsia-200/80 hover:border-rose-400/50 hover:text-rose-200",
       shareBtn: "bg-fuchsia-500 hover:bg-fuchsia-400 text-white",
       obsBtn: "bg-lime-400 hover:bg-lime-300 text-slate-950",
+      projectionBtn: "bg-cyan-400 hover:bg-cyan-300 text-slate-950",
       finishVotingBtn:
         "bg-gradient-to-r from-yellow-300 via-lime-400 to-cyan-400 text-slate-950 shadow-lime-900/40",
       nextQuestionBtn:
@@ -345,6 +452,20 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       title: "text-white",
       badge: "bg-fuchsia-600/70 text-white",
     },
+    projection: projectionPair(
+      [
+        "bg-lime-400",
+        "bg-fuchsia-500",
+        "bg-cyan-400",
+        "bg-yellow-300",
+        "bg-red-500",
+      ],
+      {
+        dark: {
+          bg: "min-h-screen bg-black text-lime-50 bg-[radial-gradient(ellipse_60%_40%_at_80%_0%,rgba(217,70,239,0.25),transparent)]",
+        },
+      },
+    ),
     vote: {
       bg: "bg-[#050816]",
       brand: "text-lime-400",
@@ -424,6 +545,7 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
         "border-pink-200 text-rose-400 hover:border-rose-400 hover:text-rose-600",
       shareBtn: "bg-pink-500 hover:bg-pink-400 text-white",
       obsBtn: "bg-amber-400 hover:bg-amber-300 text-fuchsia-950",
+      projectionBtn: "bg-fuchsia-600 hover:bg-fuchsia-500 text-white",
       finishVotingBtn:
         "bg-gradient-to-r from-amber-300 via-yellow-300 to-lime-300 text-fuchsia-950 shadow-amber-200/50",
       nextQuestionBtn:
@@ -444,6 +566,13 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       title: "text-fuchsia-950 drop-shadow-none",
       badge: "bg-amber-300/90 text-fuchsia-950",
     },
+    projection: projectionPair([
+      "bg-pink-500",
+      "bg-amber-400",
+      "bg-cyan-500",
+      "bg-yellow-400",
+      "bg-violet-500",
+    ]),
     vote: {
       bg: "bg-gradient-to-b from-[#fff7fb] via-[#fff1f7] to-[#fff8e7] text-fuchsia-950",
       brand: "text-pink-500",
@@ -526,6 +655,8 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       shareBtn:
         "bg-emerald-400 hover:bg-emerald-300 text-emerald-950 shadow-emerald-900/20",
       obsBtn: "bg-amber-400 hover:bg-amber-300 text-amber-950",
+      projectionBtn:
+        "bg-lime-400 hover:bg-lime-300 text-emerald-950 shadow-emerald-900/20",
       finishVotingBtn:
         "bg-gradient-to-r from-amber-300 via-lime-300 to-emerald-400 text-emerald-950 shadow-amber-900/25",
       nextQuestionBtn:
@@ -547,6 +678,25 @@ export const THEMES: Record<PollTheme, ThemeConfig> = {
       title: "text-emerald-950 drop-shadow-none",
       badge: "bg-lime-200/90 text-emerald-900",
     },
+    projection: projectionPair(
+      [
+        "bg-amber-400",
+        "bg-lime-400",
+        "bg-emerald-400",
+        "bg-orange-300",
+        "bg-teal-300",
+      ],
+      {
+        dark: {
+          bg: "min-h-screen bg-black text-lime-50 bg-[radial-gradient(ellipse_70%_45%_at_20%_-10%,rgba(132,204,22,0.2),transparent)]",
+          decor: "animal-race-projection-dark",
+        },
+        light: {
+          bg: "min-h-screen bg-[#f7fbf2] text-emerald-950",
+          decor: "animal-race-projection-light",
+        },
+      },
+    ),
     vote: {
       bg: "bg-gradient-to-b from-[#eef8e8] via-[#f7f3e8] to-[#e8f5e4] text-emerald-950",
       brand: "text-emerald-600",
@@ -610,6 +760,19 @@ export function normalizeTheme(theme: unknown): PollTheme {
 /** Primary accessor: THEMES[id] with legacy / fallback normalization */
 export function getTheme(theme: unknown): ThemeConfig {
   return THEMES[normalizeTheme(theme)];
+}
+
+export function getProjectionStyles(
+  theme: unknown,
+  mode: ProjectionVenueMode,
+): ProjectionModeStyles {
+  return getTheme(theme).projection[mode];
+}
+
+export function normalizeProjectionMode(
+  value: unknown,
+): ProjectionVenueMode {
+  return value === "light" ? "light" : "dark";
 }
 
 /** @deprecated Prefer getTheme / THEMES */

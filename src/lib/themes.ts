@@ -11,11 +11,16 @@ export {
   THEMES,
   canUseTheme,
   getOptionIcon,
+  getProjectionStyles,
   getTheme,
   getThemeDefinition,
   getThemeVisuals,
+  normalizeProjectionMode,
   normalizeTheme,
   type ChartTone,
+  type ProjectionConfig,
+  type ProjectionModeStyles,
+  type ProjectionVenueMode,
   type ThemeConfig,
 } from "@/config/themes";
 

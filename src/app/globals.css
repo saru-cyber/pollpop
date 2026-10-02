@@ -38,6 +38,12 @@ body.admin-shell {
   background-image: none !important;
 }
 
+/* Projection venue: solid canvas, no site chrome gradients */
+body.projection-shell {
+  background: #000 !important;
+  background-image: none !important;
+}
+
 input[type="radio"] {
   accent-color: #22d3ee;
 }
